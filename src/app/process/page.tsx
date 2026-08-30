@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { Process } from '@/sections/Process'
 
 export const metadata: Metadata = {
-  title: 'Process',
-  description: 'Our software engineering process: Discovery, Architecture, Product Design, Engineering, Quality, Deployment, and Evolution.',
+  title: 'Processo',
+  description: 'Nosso processo de engenharia: Entendimento, Arquitetura, Experiência, Desenvolvimento, Qualidade, Lançamento e Evolução.',
 }
 
 export default function ProcessPage() {

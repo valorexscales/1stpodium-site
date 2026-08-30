@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { About } from '@/sections/About'
 
 export const metadata: Metadata = {
-  title: 'About',
-  description: 'About 1stPodium. A software engineering company combining product thinking, engineering excellence, and modern technology.',
+  title: 'Sobre',
+  description: 'Sobre a 1stPodium. Empresa de engenharia de software combinando pensamento de produto, excelência técnica e tecnologia moderna.',
 }
 
 export default function AboutPage() {

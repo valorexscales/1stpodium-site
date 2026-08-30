@@ -8,6 +8,8 @@ import { CodeMoment } from '@/sections/CodeMoment'
 import { Work } from '@/sections/Work'
 import { VideoShowcase } from '@/sections/VideoShowcase'
 import { About } from '@/sections/About'
+import { Trust } from '@/sections/Trust'
+import { FAQ } from '@/sections/FAQ'
 import { FinalCTA } from '@/sections/FinalCTA'
 import { ContactFlow } from '@/sections/ContactFlow'
 
@@ -24,6 +26,8 @@ export default function HomePage() {
       <Work />
       <VideoShowcase />
       <About />
+      <Trust />
+      <FAQ />
       <FinalCTA />
       <ContactFlow />
     </>

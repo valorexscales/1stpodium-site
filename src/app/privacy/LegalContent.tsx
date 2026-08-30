@@ -1,8 +1,8 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { gsap } from 'gsap'
-import { MagneticButton } from '@/components/ui/MagneticButton'
 
 interface LegalContentProps {
   type: 'privacy' | 'terms'
@@ -10,29 +10,29 @@ interface LegalContentProps {
 
 const content = {
   privacy: {
-    title: 'PRIVACY POLICY',
+    title: 'POLÍTICA DE PRIVACIDADE',
     sections: [
-      { heading: '1. INFORMATION WE COLLECT', body: 'We collect information you provide directly to us, such as when you fill out a contact form, request a quote, or communicate with us. This may include your name, email address, company name, and project details.' },
-      { heading: '2. HOW WE USE YOUR INFORMATION', body: 'We use the information we collect to respond to your inquiries, provide our services, improve our website, and communicate with you about your project. We do not sell your personal information to third parties.' },
-      { heading: '3. DATA RETENTION', body: 'We retain your information only as long as necessary to fulfill the purposes outlined in this policy, unless a longer retention period is required by law.' },
-      { heading: '4. SECURITY', body: 'We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.' },
-      { heading: '5. YOUR RIGHTS', body: 'You have the right to access, correct, or delete your personal information. You may also object to or restrict processing of your data. Contact us at valorexscales@gmail.com to exercise these rights.' },
-      { heading: '6. CHANGES TO THIS POLICY', body: 'We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page with an updated effective date.' },
-      { heading: '7. CONTACT US', body: 'If you have questions about this privacy policy, please contact us at valorexscales@gmail.com' },
+      { heading: '1. INFORMAÇÕES QUE COLETAMOS', body: 'Coletamos informações que você nos fornece diretamente, como ao preencher um formulário de contato, solicitar um orçamento ou se comunicar conosco. Isso pode incluir seu nome, endereço de email, nome da empresa e detalhes do projeto.' },
+      { heading: '2. COMO USAMOS SUAS INFORMAÇÕES', body: 'Usamos as informações coletadas para responder a suas solicitações, fornecer nossos serviços, melhorar nosso site e se comunicar com você sobre seu projeto. Não vendemos suas informações pessoais a terceiros.' },
+      { heading: '3. RETENÇÃO DE DADOS', body: 'Mantemos suas informações apenas pelo tempo necessário para cumprir os objetivos descritos nesta política, salvo se um período mais longo for exigido por lei.' },
+      { heading: '4. SEGURANÇA', body: 'Implementamos medidas técnicas e organizacionais apropriadas para proteger suas informações pessoais contra acesso não autorizado, alteração, divulgação ou destruição.' },
+      { heading: '5. SEUS DIREITOS', body: 'Você tem o direito de acessar, corrigir ou excluir suas informações pessoais. Você também pode se opor ou restringir o processamento de seus dados. Entre em contato conosco em valorexscales@gmail.com para exercer esses direitos.' },
+      { heading: '6. ALTERAÇÕES NESTA POLÍTICA', body: 'Podemos atualizar esta política de privacidade periodicamente. Notificaremos você sobre quaisquer alterações publicando a nova política nesta página com uma data de vigência atualizada.' },
+      { heading: '7. CONTATO', body: 'Se você tiver dúvidas sobre esta política de privacidade, entre em contato conosco em valorexscales@gmail.com' },
     ],
   },
   terms: {
-    title: 'TERMS OF SERVICE',
+    title: 'TERMOS DE SERVIÇO',
     sections: [
-      { heading: '1. ACCEPTANCE OF TERMS', body: 'By accessing and using the 1stPodium website and services, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use our services.' },
-      { heading: '2. SERVICES', body: '1stPodium provides custom software engineering services including web applications, mobile applications, desktop software, backend systems, authentication systems, SaaS products, and custom software development. The scope of each project is defined in a separate agreement.' },
-      { heading: '3. INTELLECTUAL PROPERTY', body: 'All content, designs, code, and materials on this website are the intellectual property of 1stPodium or its licensors. Client project deliverables’ ownership is defined in the project agreement.' },
-      { heading: '4. CONFIDENTIALITY', body: 'We treat all client information as confidential. We will not disclose your proprietary information, trade secrets, or project details to third parties without your written consent, except as required by law.' },
-      { heading: '5. LIMITATION OF LIABILITY', body: '1stPodium shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or relating to our services. Our total liability shall not exceed the fees paid for the specific project.' },
-      { heading: '6. TERMINATION', body: 'Either party may terminate the engagement with written notice. Upon termination, you are responsible for payment of all services rendered up to the termination date.' },
-      { heading: '7. GOVERNING LAW', body: 'These terms shall be governed by the laws of the jurisdiction where 1stPodium operates. Any disputes shall be resolved through binding arbitration.' },
-      { heading: '8. CHANGES TO TERMS', body: 'We may modify these terms at any time. Continued use of our services after changes constitutes acceptance of the new terms.' },
-      { heading: '9. CONTACT US', body: 'If you have questions about these terms, please contact us at valorexscales@gmail.com' },
+      { heading: '1. ACEITAÇÃO DOS TERMOS', body: 'Ao acessar e usar o site e serviços da 1stPodium, você concorda em ficar vinculado a estes Termos de Serviço. Se você não concordar com qualquer parte destes termos, poderá não usar nossos serviços.' },
+      { heading: '2. SERVIÇOS', body: 'A 1stPodium fornece serviços de engenharia de software personalizados, incluindo aplicações web, aplicativos mobile, software para computador, sistemas backend, sistemas de autenticação, produtos SaaS e desenvolvimento de software sob medida. O escopo de cada projeto é definido em um acordo separado.' },
+      { heading: '3. PROPRIEDADE INTELECTUAL', body: 'Todo o conteúdo, designs, código e materiais neste site são propriedade intelectual da 1stPodium ou de seus licenciadores. A propriedade dos entregáveis do cliente é definida no acordo do projeto.' },
+      { heading: '4. CONFIDENCIALIDADE', body: 'Tratamos todas as informações do cliente como confidenciais. Não divulgaremos suas informações proprietárias, segredos comerciais ou detalhes do projeto a terceiros sem seu consentimento por escrito, exceto quando exigido por lei.' },
+      { heading: '5. LIMITAÇÃO DE RESPONSABILIDADE', body: 'A 1stPodium não será responsável por quaisquer danos indiretos, incidentais, especiais, consequenciais ou punitivos decorrentes ou relacionados aos nossos serviços. Nossa responsabilidade total não excederá as taxas pagas pelo projeto específico.' },
+      { heading: '6. RESCISÃO', body: 'Qualquer uma das partes pode rescindir o contrato com aviso por escrito. Após a rescisão, você é responsável pelo pagamento de todos os serviços prestados até a data de rescisão.' },
+      { heading: '7. LEI APLICÁVEL', body: 'Estes termos serão regidos pelas leis da jurisdição onde a 1stPodium opera. Quaisquer disputas serão resolvidas por arbitragem vinculativa.' },
+      { heading: '8. ALTERAÇÕES NOS TERMOS', body: 'Podemos modificar estes termos a qualquer momento. O uso continuado de nossos serviços após as alterações constitui aceitação dos novos termos.' },
+      { heading: '9. CONTATO', body: 'Se você tiver dúvidas sobre estes termos, entre em contato conosco em valorexscales@gmail.com' },
     ],
   },
 }
@@ -72,15 +72,15 @@ export function LegalContent({ type }: LegalContentProps) {
             {data.sections.map((s) => (
               <section key={s.heading} className="legal-fade" style={{ opacity: 0 }}>
                 <h2 className="text-white font-medium tracking-tight" style={{ fontSize: 'clamp(20px,2vw,28px)' }}>{s.heading}</h2>
-                <p className="mt-3 text-white/60 text-body leading-relaxed max-w-2xl">{s.body}</p>
+                <p className="mt-3 text-white/55 text-body leading-relaxed max-w-2xl">{s.body}</p>
               </section>
             ))}
           </div>
 
           <div className="mt-16 border-t border-white/10 pt-8">
-            <MagneticButton variant="secondary" href="/" data-cursor-text="RETURN HOME">
-              RETURN HOME
-            </MagneticButton>
+            <Link href="/" className="btn-secondary" data-cursor-text="VOLTAR AO INÍCIO">
+              VOLTAR AO INÍCIO
+            </Link>
           </div>
         </div>
       </div>

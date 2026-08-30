@@ -5,26 +5,26 @@ import Image from 'next/image'
 
 const cols = [
   {
-    title: 'NAVIGATE',
+    title: 'NAVEGAR',
     links: [
-      { href: '/services', label: 'Services' },
-      { href: '/work', label: 'Work' },
-      { href: '/about', label: 'About' },
-      { href: '/contact', label: 'Contact' },
+      { href: '/services', label: 'Serviços' },
+      { href: '/work', label: 'Cases' },
+      { href: '/about', label: 'Sobre' },
+      { href: '/contact', label: 'Contato' },
     ],
   },
   {
-    title: 'CAPABILITIES',
+    title: 'CAPACIDADES',
     links: [
-      { href: '/capabilities', label: 'Capabilities' },
-      { href: '/process', label: 'Process' },
+      { href: '/capabilities', label: 'Tecnologias' },
+      { href: '/process', label: 'Processo' },
     ],
   },
   {
-    title: 'LEGAL',
+    title: 'POLÍTICAS',
     links: [
-      { href: '/privacy', label: 'Privacy' },
-      { href: '/terms', label: 'Terms' },
+      { href: '/privacy', label: 'Privacidade' },
+      { href: '/terms', label: 'Termos' },
     ],
   },
   {
@@ -51,14 +51,14 @@ export function Footer() {
               className="w-auto h-auto max-h-10 object-contain mb-6"
               unoptimized
             />
-            <p className="u-0-8rem track-18 text-white/40 uppercase">
-              Software engineered<br />to perform.
+            <p className="u-0-8rem track-18 text-white/35 uppercase">
+              Engenharia de software<br />que performa.
             </p>
           </div>
 
           {cols.map((col) => (
             <nav key={col.title} aria-label={col.title}>
-              <h3 className="u-0-65rem track-2 text-white/35 uppercase mb-5">{col.title}</h3>
+              <h3 className="u-0-65rem track-2 text-white/30 uppercase mb-5 font-mono">{col.title}</h3>
               <ul className="space-y-3">
                 {col.links.map((l) => {
                   const external = l.href.startsWith('http')
@@ -68,7 +68,7 @@ export function Footer() {
                         href={l.href}
                         target={external ? '_blank' : undefined}
                         rel={external ? 'noopener noreferrer' : undefined}
-                        className="u-0-85rem text-white/60 hover:text-white transition-colors duration-300"
+                        className="u-0-85rem text-white/50 hover:text-white transition-colors duration-300"
                         data-cursor-text={l.label.toUpperCase()}
                       >
                         {l.label}
@@ -84,14 +84,13 @@ export function Footer() {
         <div className="divider-h mt-14" />
 
         <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p className="u-0-75rem text-white/35">© 2026 1stPodium. All rights reserved.</p>
-          <p className="u-0-75rem text-white/35">Engineered from first architecture to production.</p>
+          <p className="u-0-75rem text-white/30">© 2026 1stPodium. Todos os direitos reservados.</p>
+          <p className="u-0-75rem text-white/30">Engenharia do primeiro código à produção.</p>
         </div>
       </div>
 
-      {/* large clipped wordmark */}
       <div aria-hidden="true" className="pointer-events-none select-none -mb-[3vw]">
-        <p className="text-center font-bold leading-none tracking-tighter text-[clamp(90px,16vw,220px)] text-white/[0.05]">
+        <p className="text-center font-bold leading-none tracking-tighter text-[clamp(90px,16vw,220px)] text-white/[0.04]">
           1STPODIUM
         </p>
       </div>

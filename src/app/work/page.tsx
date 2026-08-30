@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { Work } from '@/sections/Work'
 
 export const metadata: Metadata = {
-  title: 'Work',
-  description: 'Selected work and case studies from 1stPodium. Custom software engineering projects across fintech, healthtech, logistics, and e-commerce.',
+  title: 'Cases',
+  description: 'Projetos e cases da 1stPodium. Engenharia de software personalizada.',
 }
 
 export default function WorkPage() {

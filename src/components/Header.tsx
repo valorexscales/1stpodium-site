@@ -6,11 +6,11 @@ import Image from 'next/image'
 import { gsap } from 'gsap'
 
 const navItems = [
-  { href: '/services', label: 'SERVICES' },
-  { href: '/capabilities', label: 'CAPABILITIES' },
-  { href: '/process', label: 'PROCESS' },
-  { href: '/work', label: 'WORK' },
-  { href: '/about', label: 'ABOUT' },
+  { href: '/services', label: 'SERVIÇOS' },
+  { href: '/capabilities', label: 'CAPACIDADES' },
+  { href: '/process', label: 'PROCESSO' },
+  { href: '/work', label: 'CASES' },
+  { href: '/about', label: 'SOBRE' },
 ]
 
 export function Header() {
@@ -62,29 +62,29 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-9" aria-label="Main navigation">
+        <nav className="hidden lg:flex items-center gap-9" aria-label="Navegação principal">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="relative group u-0-72rem track-16 text-white/55 hover:text-white transition-colors duration-300"
+              className="relative group u-0-72rem track-16 text-white/50 hover:text-white transition-colors duration-300"
               data-cursor-text={item.label}
             >
               {item.label}
               <span className="absolute -bottom-1 left-0 h-px w-0 bg-white transition-all duration-500 group-hover:w-full" />
             </Link>
           ))}
-          <Link href="/contact" className="btn-primary !py-3 !px-6" data-cursor-text="START A PROJECT">
-            START A PROJECT
+          <Link href="/contact" className="btn-primary !py-3 !px-6" data-cursor-text="INICIAR PROJETO">
+            INICIAR PROJETO
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M5 12h14M12 5l7 7-7 7" />
+              <path d="M7 17L17 7M17 7H7M17 7v10" />
             </svg>
           </Link>
         </nav>
 
         <button
           className="lg:hidden p-2"
-          aria-label="Open menu"
+          aria-label="Abrir menu"
           data-cursor-text="MENU"
         >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

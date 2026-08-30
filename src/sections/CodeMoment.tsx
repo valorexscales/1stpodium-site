@@ -17,7 +17,7 @@ const codeLines = [
   { text: '  }', accent: 'plain' },
   { text: '}', accent: 'plain' },
   { text: '', accent: 'plain' },
-  { text: '// Engineering is in the details.', accent: 'comment' },
+  { text: '// Engenharia está nos detalhes.', accent: 'comment' },
 ]
 
 export function CodeMoment() {
@@ -46,38 +46,38 @@ export function CodeMoment() {
   }, [])
 
   const color = (accent: string) =>
-    accent === 'keyword' ? 'text-white' : accent === 'comment' ? 'text-white/35' : 'text-white/70'
+    accent === 'keyword' ? 'text-white' : accent === 'comment' ? 'text-white/30' : 'text-white/60'
 
   return (
-    <section ref={root} className="relative section bg-black overflow-hidden" aria-label="Engineering is in the details">
+    <section ref={root} className="relative section bg-black overflow-hidden" aria-label="Detalhes da engenharia">
       <div className="bg-env" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
 
       <div className="container-main relative z-10 grid lg:grid-cols-2 gap-14 items-center">
         <div>
-          <p className="label code-head mb-10" data-index="06 / CRAFT">PRECISION</p>
-          <h2 className="text-white font-bold tracking-tighter code-head" style={{ fontSize: 'clamp(42px,5.5vw,88px)', lineHeight: 0.98, opacity: 0 }}>
-            ENGINEERING
+          <p className="label code-head mb-10" data-index="07 / CRAFT">PRECISÃO</p>
+          <h2 className="text-white font-bold tracking-tighter code-head" style={{ fontSize: 'clamp(40px,5vw,80px)', lineHeight: 0.98, opacity: 0 }}>
+            ENGENHARIA
             <br />
-            IS IN THE
+            ESTÁ NOS
             <br />
-            DETAILS.
+            <span className="text-stroke">DETALHES.</span>
           </h2>
         </div>
 
         <div className="code-block">
-          <div className="border hairline bg-black-100 rounded overflow-hidden">
+          <div className="border hairline bg-white/[0.02] rounded overflow-hidden">
             <div className="flex items-center gap-2 px-5 py-3 border-b hairline">
               <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
               <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
               <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
-              <span className="ml-3 font-mono u-0-65rem text-white/35 tracking-wider">software-core.ts</span>
+              <span className="ml-3 font-mono u-0-65rem text-white/30 tracking-wider">software-core.ts</span>
             </div>
             <pre className="p-6 overflow-x-auto">
               <code>
                 {codeLines.map((line, i) => (
                   <div key={i} ref={(el) => { lineRefs.current[i] = el }} className="flex gap-4 font-mono text-xs leading-loose" style={{ opacity: 0 }}>
-                    <span className="select-none text-white/20 w-4 text-right shrink-0">{i + 1}</span>
+                    <span className="select-none text-white/15 w-4 text-right shrink-0">{i + 1}</span>
                     <span className={`whitespace-pre ${color(line.accent)}`}>{line.text || ' '}</span>
                   </div>
                 ))}

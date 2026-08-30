@@ -11,21 +11,21 @@ import { Preloader } from '@/components/Preloader'
 export const metadata: Metadata = {
   metadataBase: new URL('https://1stpodium-site.vercel.app'),
   title: {
-    default: '1stPodium — Software Engineered to Perform',
+    default: '1stPodium — Desenvolvimento de Software Sob Medida',
     template: '%s | 1stPodium',
   },
-  description: 'Custom software engineering company. Web applications, mobile apps, desktop software, backend systems, authentication, SaaS products, and custom digital products built from architecture to deployment.',
+  description: 'Criamos aplicações web, aplicativos mobile, software para computador, SaaS, backends, APIs, automações e sistemas personalizados. Engenharia de software do primeiro código à produção.',
   keywords: [
-    'software engineering',
-    'custom software development',
-    'web applications',
-    'mobile applications',
-    'desktop software',
-    'backend development',
-    'SaaS development',
-    'authentication systems',
-    'system architecture',
-    'digital product development',
+    'desenvolvimento de software',
+    'software sob medida',
+    'aplicação web',
+    'aplicativo mobile',
+    'SaaS',
+    'backend',
+    'API',
+    'automação',
+    'segurança de software',
+    'arquitetura de sistemas',
   ],
   authors: [{ name: '1stPodium' }],
   creator: '1stPodium',
@@ -33,24 +33,24 @@ export const metadata: Metadata = {
   robots: 'index, follow',
   openGraph: {
     type: 'website',
-    locale: 'en_US',
-    url: 'https://1stpodium.com',
+    locale: 'pt_BR',
+    url: 'https://1stpodium-site.vercel.app',
     siteName: '1stPodium',
-    title: '1stPodium — Software Engineered to Perform',
-    description: 'Custom software engineered from architecture to deployment. Web, mobile, desktop, backend, and systems.',
+    title: '1stPodium — Desenvolvimento de Software Sob Medida',
+    description: 'Criamos aplicações web, mobile, desktop, SaaS, backends, APIs e sistemas personalizados. Engenharia de software completa.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: '1stPodium — Software Engineered to Perform',
+        alt: '1stPodium — Desenvolvimento de Software Sob Medida',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '1stPodium — Software Engineered to Perform',
-    description: 'Custom software engineered from architecture to deployment.',
+    title: '1stPodium — Desenvolvimento de Software Sob Medida',
+    description: 'Criamos aplicações web, mobile, desktop, SaaS, backends, APIs e sistemas personalizados.',
     images: ['/og-image.png'],
   },
   verification: {
@@ -89,10 +89,10 @@ export default function RootLayout({
     name: '1stPodium',
     url: 'https://1stpodium-site.vercel.app',
     logo: 'https://1stpodium-site.vercel.app/1STPodium.png',
-    description: 'Software engineering company. Custom software engineered from architecture to deployment.',
+    description: 'Engenharia de software sob medida. Aplicações web, mobile, desktop, SaaS, backends e sistemas personalizados.',
   }
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="pt-BR" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

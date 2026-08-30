@@ -39,19 +39,19 @@ export function FinalCTA() {
     return () => ctx.revert()
   }, [])
 
-  const lines = ["LET'S BUILD", 'WHAT’S NEXT.']
+  const lines = ['VAMOS', 'TRANSFORMAR', 'EM SOFTWARE.']
 
   return (
-    <section ref={root} className="relative section bg-black overflow-hidden" aria-label="Start a project">
+    <section ref={root} className="relative section bg-black overflow-hidden" aria-label="Iniciar projeto">
       <div className="bg-env" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
 
       <div className="container-main relative z-10">
-        <p className="label cta-fade mb-8" data-index="09 / START" style={{ opacity: 0 }}>
-          HAVE A PROJECT?
+        <p className="label cta-fade mb-8" data-index="13 / INICIAR" style={{ opacity: 0 }}>
+          TEM UMA IDEIA?
         </p>
 
-        <h2 className="text-white font-bold tracking-tighter" style={{ fontSize: 'clamp(64px,9vw,140px)', lineHeight: 0.94 }}>
+        <h2 className="text-white font-bold tracking-tighter" style={{ fontSize: 'clamp(56px,8vw,130px)', lineHeight: 0.94 }}>
           {lines.map((l, i) => (
             <span key={i} className="block overflow-hidden py-track">
               <span ref={(e) => { if (e) lineRefs.current[i] = e }} className="block will-change-transform">
@@ -62,20 +62,19 @@ export function FinalCTA() {
         </h2>
 
         <div className="mt-10 flex flex-wrap gap-4 cta-fade" style={{ opacity: 0 }}>
-          <Link href="/contact" className="btn-primary" data-cursor-text="START A PROJECT">
-            START A PROJECT
+          <Link href="/contact" className="btn-primary btn-magnetic" data-cursor-text="INICIAR PROJETO">
+            INICIAR PROJETO
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M5 12h14M12 5l7 7-7 7" />
+              <path d="M7 17L17 7M17 7H7M17 7v10" />
             </svg>
           </Link>
-          <Link href="/contact" className="btn-secondary" data-cursor-text="CONTACT US">
-            CONTACT US
+          <Link href="/contact" className="btn-secondary" data-cursor-text="CONVERSAR">
+            CONVERSAR
           </Link>
         </div>
 
-        {/* core slowly reconstructs behind — then fades; official mark remains */}
-        <div className="relative mt-16 h-40vh minh-300" aria-hidden="true">
-          <div ref={coreWrap} className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-full maxw-38vw" style={{ opacity: 0 }}>
+        <div className="relative mt-16 h-40vh min-h-[300px]" aria-hidden="true">
+          <div ref={coreWrap} className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-full max-w-[38vw]" style={{ opacity: 0 }}>
             <SoftwareCoreCanvas className="absolute inset-0" section="cta" />
           </div>
         </div>

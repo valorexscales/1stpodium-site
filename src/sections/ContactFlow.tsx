@@ -3,27 +3,28 @@
 import { useState, FormEvent } from 'react'
 import Link from 'next/link'
 
-type StepId = 'what' | 'stage' | 'budget' | 'details'
+type StepId = 'what' | 'stage' | 'priority' | 'details' | 'budget'
 
 const steps: { id: StepId; title: string; prompt: string; options?: string[] }[] = [
-  { id: 'what', title: 'WHAT ARE WE BUILDING?', prompt: 'Select the type of project.', options: ['Web Application', 'Mobile Application', 'Desktop Software', 'SaaS Product', 'Backend / API', 'Authentication System', 'Automation & Integrations', 'Custom Software', 'Other'] },
-  { id: 'stage', title: 'PROJECT STAGE', prompt: 'Where is the project today?', options: ['Idea / Concept', 'Planning / Specification', 'Existing Product (Scaling)', 'Existing Product (Rebuild / Modernization)', 'MVP Development'] },
-  { id: 'budget', title: 'BUDGET RANGE', prompt: 'Approximate investment range.', options: ['Under $1,000', '$1,000 – $5,000', '$5,000 – $10,000', '$10,000 – $25,000', '$25,000 – $50,000', '$50,000+', "Let's discuss"] },
-  { id: 'details', title: 'PROJECT DETAILS', prompt: 'The last step.', options: undefined },
+  { id: 'what', title: 'O QUE VOCÊ PRECISA?', prompt: 'Selecione o tipo de projeto.', options: ['Aplicação Web', 'Aplicativo Mobile', 'Software para Computador', 'SaaS', 'Automação', 'Sistema Empresarial', 'Backend / API', 'Login / Autenticação', 'Software Personalizado', 'Ainda não sei'] },
+  { id: 'stage', title: 'EM QUE MOMENTO ESTÁ?', prompt: 'Onde está o projeto hoje?', options: ['Tenho uma ideia', 'Estou planejando', 'Já tenho um produto', 'Preciso reconstruir', 'Preciso escalar'] },
+  { id: 'priority', title: 'O QUE MAIS IMPORTA?', prompt: 'Prioridade do projeto.', options: ['Performance', 'Segurança', 'Rapidez para lançar', 'Escalabilidade', 'Integrações', 'Automação', 'Projeto completo'] },
+  { id: 'details', title: 'DETALHES', prompt: 'O último passo.', options: undefined },
+  { id: 'budget', title: 'ORÇAMENTO', prompt: 'Faixa de investimento (opcional).', options: ['Ainda estou definindo', 'Até R$5 mil', 'R$5–10 mil', 'R$10–25 mil', 'R$25 mil+', 'Prefiro conversar'] },
 ]
 
 const fieldDef = {
-  name: { label: 'FULL NAME', type: 'text' as const, ph: 'Your name' },
-  email: { label: 'EMAIL ADDRESS', type: 'email' as const, ph: 'you@company.com' },
-  company: { label: 'COMPANY', type: 'text' as const, ph: 'Company (optional)' },
-  description: { label: 'PROJECT DESCRIPTION', type: 'textarea' as const, ph: 'What are you building, and what does success look like?' },
+  name: { label: 'NOME', type: 'text' as const, ph: 'Seu nome' },
+  email: { label: 'EMAIL', type: 'email' as const, ph: 'voce@empresa.com' },
+  company: { label: 'EMPRESA', type: 'text' as const, ph: 'Empresa (opcional)' },
+  description: { label: 'CONTE SOBRE O PROJETO', type: 'textarea' as const, ph: 'O que você está construindo, e o que seria sucesso?' },
 }
 
 export function ContactFlow() {
   const [step, setStep] = useState(0)
   const [data, setData] = useState<Record<string, string>>({})
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [error, setError] = useState('');
+  const [error, setError] = useState('')
   const current = steps[step]
 
   const pick = (v: string) => {
@@ -31,7 +32,7 @@ export function ContactFlow() {
   }
   const next = () => {
     if (current.options && !data[current.id]) {
-      setError('Please select an option to continue.')
+      setError('Selecione uma opção para continuar.')
       return
     }
     setError('')
@@ -45,7 +46,7 @@ export function ContactFlow() {
     const email = data.email?.trim()
     const desc = data.description?.trim()
     if (!name || !email || !desc || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please fill in your name, a valid email and a short description.')
+      setError('Preencha seu nome, um email válido e uma breve descrição.')
       return
     }
     setStatus('loading')
@@ -54,53 +55,50 @@ export function ContactFlow() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: data.what, stage: data.stage, budget: data.budget, ...data }),
+        body: JSON.stringify({ type: data.what, stage: data.stage, priority: data.priority, budget: data.budget, ...data }),
       })
       if (!res.ok) throw new Error()
       setStatus('success')
     } catch {
       setStatus('error')
-      setError('Something went wrong. Please try again, or email us directly.')
+      setError('Algo deu errado. Por favor, tente novamente ou nos envie um email.')
     }
   }
 
-  /* ----- success state ----- */
   if (status === 'success') {
     return (
-      <section className="minh-70vh flex items-center justify-center bg-black" aria-live="polite">
+      <section className="min-h-[70vh] flex items-center justify-center bg-black" aria-live="polite">
         <div className="container-main text-center">
-          <h2 className="text-white font-bold tracking-tighter" style={{ fontSize: 'clamp(44px,6vw,88px)' }}>PROJECT RECEIVED.</h2>
-          <p className="mt-6 text-white/60 text-body-lg">We&apos;ll review your inquiry and be in touch.</p>
-          <Link href="/" className="btn-secondary mt-10 inline-flex">RETURN HOME</Link>
+          <h2 className="text-white font-bold tracking-tighter" style={{ fontSize: 'clamp(44px,6vw,88px)' }}>PROJETO RECEBIDO.</h2>
+          <p className="mt-6 text-white/55 text-body-lg">Vamos analisar e entrar em contato.</p>
+          <Link href="/" className="btn-secondary mt-10 inline-flex">VOLTAR AO INÍCIO</Link>
         </div>
       </section>
     )
   }
 
-  /* ----- multi-step form ----- */
   return (
-    <section className="relative section bg-black overflow-hidden" aria-label="Start a project">
+    <section className="relative section bg-black overflow-hidden" aria-label="Iniciar projeto">
       <div className="bg-env" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
 
       <div className="container-main relative z-10 max-w-3xl">
-        <p className="label" data-index="10 / CONTACT">START A PROJECT</p>
+        <p className="label" data-index="12 / CONTATO">O QUE VAMOS CONSTRUIR?</p>
+        <p className="mt-4 text-white/40 text-body-lg">Você explica a ideia. A parte técnica pode ficar com a gente.</p>
 
-        {/* progress */}
         <div className="mt-10 flex items-center gap-3" aria-hidden="true">
           {steps.map((s, i) => (
-            <span key={s.id} className={`h-px flex-1 transition-colors duration-500 ${i <= step ? 'bg-white' : 'bg-white/15'}`} />
+            <span key={s.id} className={`h-px flex-1 transition-colors duration-500 ${i <= step ? 'bg-white' : 'bg-white/10'}`} />
           ))}
         </div>
-        <p className="mt-3 text-micro text-white/40 uppercase track-18">
-          STEP {String(step + 1).padStart(2, '0')} / {String(steps.length).padStart(2, '0')} — {current.title}
+        <p className="mt-3 text-micro text-white/35 uppercase track-18 font-mono">
+          ETAPA {String(step + 1).padStart(2, '0')} / {String(steps.length).padStart(2, '0')} — {current.title}
         </p>
 
         <form onSubmit={submit} className="mt-12">
-          {/* option step */}
           {current.options ? (
             <fieldset>
-              <legend className="text-white font-medium" style={{ fontSize: 'clamp(24px,2.6vw,38px)' }}>{current.prompt}</legend>
+              <legend className="text-white font-medium" style={{ fontSize: 'clamp(22px,2.4vw,36px)' }}>{current.prompt}</legend>
               <div className="mt-8 grid sm:grid-cols-2 gap-3">
                 {current.options.map((o) => {
                   const selected = data[current.id] === o
@@ -110,9 +108,9 @@ export function ContactFlow() {
                       type="button"
                       onClick={() => pick(o)}
                       className={`text-left px-5 py-4 border rounded transition-colors duration-300 text-body ${
-                        selected ? 'border-white bg-white/[0.06] text-white' : 'border-white/15 text-white/65 hover:border-white/40 hover:text-white'
+                        selected ? 'border-white bg-white/[0.06] text-white' : 'border-white/12 text-white/55 hover:border-white/30 hover:text-white'
                       }`}
-                      data-cursor-text="SELECT"
+                      data-cursor-text="SELECIONAR"
                       aria-pressed={selected}
                     >
                       {o}
@@ -122,19 +120,18 @@ export function ContactFlow() {
               </div>
             </fieldset>
           ) : (
-            /* detail step */
             <fieldset className="space-y-6">
-              <legend className="sr-only">Project details</legend>
+              <legend className="sr-only">Detalhes do projeto</legend>
               {Object.entries(fieldDef).map(([key, f]) => (
                 <label key={key} className="block">
-                  <span className="text-micro text-white/40 track-18 uppercase">{f.label}</span>
+                  <span className="text-micro text-white/35 track-18 uppercase font-mono">{f.label}</span>
                   {f.type === 'textarea' ? (
                     <textarea
                       value={data[key] || ''}
                       onChange={(e) => setData((d) => ({ ...d, [key]: e.target.value }))}
                       placeholder={f.ph}
                       rows={5}
-                      className="mt-2 w-full bg-black/50 border border-white/15 rounded px-4 py-3 text-white placeholder:text-white/30 focus:border-white transition-colors resize-y"
+                      className="mt-2 w-full bg-white/[0.03] border border-white/12 rounded px-4 py-3 text-white placeholder:text-white/25 focus:border-white/40 transition-colors resize-y"
                     />
                   ) : (
                     <input
@@ -142,7 +139,7 @@ export function ContactFlow() {
                       value={data[key] || ''}
                       onChange={(e) => setData((d) => ({ ...d, [key]: e.target.value }))}
                       placeholder={f.ph}
-                      className="mt-2 w-full bg-black/50 border border-white/15 rounded px-4 py-3 text-white placeholder:text-white/30 focus:border-white transition-colors"
+                      className="mt-2 w-full bg-white/[0.03] border border-white/12 rounded px-4 py-3 text-white placeholder:text-white/25 focus:border-white/40 transition-colors"
                     />
                   )}
                 </label>
@@ -150,24 +147,24 @@ export function ContactFlow() {
             </fieldset>
           )}
 
-          {error && <p className="mt-6 text-white/70 text-body" role="alert">{error}</p>}
+          {error && <p className="mt-6 text-white/60 text-body" role="alert">{error}</p>}
 
           <div className="mt-10 flex justify-end gap-4">
             {step > 0 && (
-              <button type="button" onClick={back} className="btn-secondary" data-cursor-text="BACK">BACK</button>
+              <button type="button" onClick={back} className="btn-secondary" data-cursor-text="VOLTAR">VOLTAR</button>
             )}
             {step < steps.length - 1 ? (
-              <button type="button" onClick={next} className="btn-primary" data-cursor-text="NEXT">
-                NEXT
+              <button type="button" onClick={next} className="btn-primary btn-magnetic" data-cursor-text="PRÓXIMO">
+                PRÓXIMO
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </button>
             ) : (
-              <button type="submit" disabled={status === 'loading'} className="btn-primary disabled:opacity-50" data-cursor-text="SUBMIT">
-                {status === 'loading' ? 'SUBMITTING…' : 'SUBMIT PROJECT'}
+              <button type="submit" disabled={status === 'loading'} className="btn-primary btn-magnetic disabled:opacity-50" data-cursor-text="ENVIAR">
+                {status === 'loading' ? 'ENVIANDO…' : 'ENVIAR PROJETO'}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
+                  <path d="M7 17L17 7M17 7H7M17 7v10" />
                 </svg>
               </button>
             )}

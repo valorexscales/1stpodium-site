@@ -6,7 +6,7 @@ import { SoftwareCoreCanvas } from '@/components/webgl/SoftwareCore'
 
 export function About() {
   const root = useRef<HTMLElement>(null)
-  const [t, setT] = useState(0) // 0 dark → 1 light
+  const [t, setT] = useState(0)
 
   useEffect(() => {
     const el = root.current
@@ -19,13 +19,10 @@ export function About() {
         opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: 'power2.out',
         scrollTrigger: { trigger: el, start: 'top 72%', toggleActions: 'play none none reverse' },
       })
-
-      /* parallax on the 3D canvas */
       const canvas = el.querySelector('.ab-canvas-wrap')
       if (canvas) {
         gsap.fromTo(canvas, { y: 40 }, {
-          y: -40,
-          ease: 'none',
+          y: -40, ease: 'none',
           scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
         })
       }
@@ -48,51 +45,47 @@ export function About() {
     }
   }, [])
 
-  const bg = `rgb(${Math.round(0 + t * 242)}, ${Math.round(0 + t * 242)}, ${Math.round(0 + t * 242)})` // → #F2F2F0
+  const bg = `rgb(${Math.round(0 + t * 242)}, ${Math.round(0 + t * 242)}, ${Math.round(0 + t * 239)})`
   const ink = t > 0.55 ? '#080808' : '#fff'
-  const muted = t > 0.55 ? 'rgba(8,8,8,0.62)' : 'rgba(255,255,255,0.62)'
-  const label = t > 0.55 ? 'rgba(8,8,8,0.42)' : 'rgba(255,255,255,0.42)'
+  const muted = t > 0.55 ? 'rgba(8,8,8,0.58)' : 'rgba(255,255,255,0.58)'
+  const label = t > 0.55 ? 'rgba(8,8,8,0.38)' : 'rgba(255,255,255,0.38)'
 
   return (
     <section
       ref={root}
       className="relative overflow-hidden transition-colors duration-300"
       style={{ backgroundColor: bg, color: ink }}
-      aria-label="Software should do more than work"
+      aria-label="Software deve fazer mais do que funcionar"
     >
       <div className="grain" aria-hidden="true" />
 
       <div className="container-main relative z-[1] py-28 lg:py-40">
         <div className="grid lg:grid-cols-[45fr_55fr] gap-12 items-center">
-          {/* LEFT text — never overlapped */}
           <div className="relative z-[2]">
-            <p className="label mb-8" data-index="08 / PHILOSOPHY" style={{ color: label }}>
-              SOFTWARE SHOULD
+            <p className="label mb-8" data-index="08 / FILOSOFIA" style={{ color: label }}>
+              SOFTWARE DEVE
             </p>
 
-            <h2 className="font-bold tracking-tighter" style={{ fontSize: 'clamp(54px,7vw,110px)', lineHeight: 0.96, color: ink }}>
+            <h2 className="font-bold tracking-tighter" style={{ fontSize: 'clamp(48px,6vw,100px)', lineHeight: 0.96, color: ink }}>
               SOFTWARE
               <br />
-              SHOULD DO MORE
+              DEVE FAZER MAIS
               <br />
-              THAN WORK.
+              DO QUE
               <br />
-              <span
-                className="ab-head"
-                style={{ color: ink }}
-              >
-                IT SHOULD PERFORM.
-              </span>
+              <span className="ab-head" style={{ color: ink }}>FUNCIONAR.</span>
             </h2>
 
-            <p className="mt-10 max-w-md text-body-lg" style={{ color: muted }}>
-              1stPodium combines product thinking, software engineering and modern technology to transform ideas
-              into reliable digital products.
+            <p className="mt-6 font-mono u-0-7rem track-14 uppercase" style={{ color: label }}>
+              PRECISA PERFORMAR.
+            </p>
+
+            <p className="mt-10 max-w-md text-body-lg leading-relaxed" style={{ color: muted }}>
+              Cada decisão técnica deve contribuir para um produto mais rápido, confiável e fácil de evoluir.
             </p>
           </div>
 
-          {/* RIGHT visual — contained in its own composition area */}
-          <div className="ab-canvas-wrap relative w-full maxh-70vh maxw-600 ml-auto aspect-square" aria-hidden="true">
+          <div className="ab-canvas-wrap relative w-full max-h-[70vh] max-w-[600px] ml-auto aspect-square" aria-hidden="true">
             <SoftwareCoreCanvas className="absolute inset-0" section="capabilities" light={t > 0.55} />
           </div>
         </div>

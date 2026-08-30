@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { gsap } from 'gsap'
-import { MagneticButton } from '@/components/ui/MagneticButton'
 
 export default function NotFound() {
   const root = useRef<HTMLDivElement>(null)
@@ -30,15 +30,17 @@ export default function NotFound() {
       <div className="container-main relative z-10 text-center">
         <p className="nf-elt font-mono u-0-7rem track-3 text-white/30" style={{ opacity: 0 }}>404</p>
         <h1 className="nf-elt text-white font-bold tracking-tighter mt-6" style={{ fontSize: 'clamp(44px,7vw,110px)', lineHeight: 1.02, opacity: 0 }}>
-          ROUTE NOT FOUND.
+          ROTA NÃO
+          <br />
+          ENCONTRADA.
         </h1>
         <p className="nf-elt mt-6 text-white/55 text-body-lg" style={{ opacity: 0 }}>
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+          A página que você procura não existe ou foi movida.
         </p>
         <div className="nf-elt mt-10" style={{ opacity: 0 }}>
-          <MagneticButton variant="primary" href="/" data-cursor-text="RETURN HOME">
-            RETURN HOME
-          </MagneticButton>
+          <Link href="/" className="btn-primary" data-cursor-text="VOLTAR AO INÍCIO">
+            VOLTAR AO INÍCIO
+          </Link>
         </div>
       </div>
     </div>

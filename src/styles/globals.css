@@ -328,3 +328,128 @@
 .clip-reveal.is-visible {
   clip-path: inset(0% 0 0 0);
 }
+
+/* --- HUD overlay elements --- */
+.hud-label {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(4px);
+}
+.hud-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  animation: hud-pulse 2s ease-in-out infinite;
+}
+@keyframes hud-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* --- Grid perspective background --- */
+.grid-perspective {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  transform: perspective(500px) rotateX(60deg);
+  transform-origin: center top;
+}
+
+/* --- Data pulse animation --- */
+@keyframes data-pulse {
+  0% { transform: translateX(-100%); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.data-pulse {
+  position: absolute;
+  height: 1px;
+  width: 80px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: data-pulse 3s ease-in-out infinite;
+}
+
+/* --- Glow light effect --- */
+.glow-light {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* --- Section connector --- */
+.section-connector {
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+}
+.section-connector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+}
+
+/* --- Sticky service visual --- */
+.service-visual-sticky {
+  position: sticky;
+  top: 120px;
+  height: calc(100vh - 160px);
+}
+
+/* --- Text mask reveal --- */
+@keyframes text-mask-reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0% 0 0); }
+}
+
+/* --- Button magnetic --- */
+.btn-magnetic {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-magnetic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.08);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-magnetic:hover::after {
+  transform: translateY(0);
+}
+
+/* --- Smooth section transitions --- */
+.section-dark {
+  background: #000;
+}
+.section-darker {
+  background: #050505;
+}
+.section-light {
+  background: #F2F2EF;
+  color: #080808;
+}
+
+/* --- Image treatment --- */
+.img-treatment {
+  filter: grayscale(0.3) contrast(1.1);
+  transition: filter 0.6s ease;
+}
+.img-treatment:hover {
+  filter: grayscale(0) contrast(1.05);
+}
