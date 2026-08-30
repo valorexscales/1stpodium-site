@@ -9,6 +9,7 @@ export function Hero() {
   const root = useRef<HTMLElement>(null)
   const headLines = useRef<HTMLSpanElement[]>([])
   const coreWrap = useRef<HTMLDivElement>(null)
+  const copyRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = root.current
@@ -27,6 +28,33 @@ export function Hero() {
       tl.fromTo(el.querySelector('.hero-meta'), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, 0.92)
       tl.fromTo(el.querySelector('.hero-ctas'), { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7 }, 1.05)
       tl.fromTo(coreWrap.current, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 1.4 }, 0.45)
+
+      /* scroll parallax — content drifts up, 3D fades */
+      if (copyRef.current) {
+        gsap.to(copyRef.current, {
+          y: -80,
+          opacity: 0.3,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.6,
+          },
+        })
+      }
+      gsap.to(coreWrap.current, {
+        y: -40,
+        scale: 0.92,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.6,
+        },
+      })
     }, el)
     return () => ctx.revert()
   }, [])
@@ -45,7 +73,7 @@ export function Hero() {
 
       <div className="container-main relative z-10 grid-hero">
         {/* LEFT / copy */}
-        <div>
+        <div ref={copyRef}>
           <p className="hero-eyebrow eyebrow opacity-0 mb-8" style={{ opacity: 0 }}>
             1STPODIUM / SOFTWARE ENGINEERING
           </p>

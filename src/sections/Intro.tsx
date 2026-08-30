@@ -38,6 +38,16 @@ export function Intro() {
           scrollTrigger: { trigger: el, start: 'top 72%', toggleActions: 'play none none reverse' },
         }
       )
+
+      /* parallax on the 3D canvas */
+      const canvas = el.querySelector('.intro-canvas-wrap')
+      if (canvas) {
+        gsap.fromTo(canvas, { y: 60 }, {
+          y: -60,
+          ease: 'none',
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+        })
+      }
     }, el)
     return () => ctx.revert()
   }, [])
@@ -80,7 +90,7 @@ export function Intro() {
           </p>
         </div>
 
-        <div className="relative w-full h-60vh minh-420 lg-h-70vh">
+        <div className="intro-canvas-wrap relative w-full h-60vh minh-420 lg-h-70vh">
           <SoftwareCoreCanvas className="absolute inset-0" section="services" />
         </div>
       </div>

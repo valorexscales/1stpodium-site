@@ -19,6 +19,16 @@ export function About() {
         opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: 'power2.out',
         scrollTrigger: { trigger: el, start: 'top 72%', toggleActions: 'play none none reverse' },
       })
+
+      /* parallax on the 3D canvas */
+      const canvas = el.querySelector('.ab-canvas-wrap')
+      if (canvas) {
+        gsap.fromTo(canvas, { y: 40 }, {
+          y: -40,
+          ease: 'none',
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+        })
+      }
     }, el)
 
     const st = gsap.to({}, {
@@ -82,7 +92,7 @@ export function About() {
           </div>
 
           {/* RIGHT visual — contained in its own composition area */}
-          <div className="relative w-full maxh-70vh maxw-600 ml-auto aspect-square" aria-hidden="true">
+          <div className="ab-canvas-wrap relative w-full maxh-70vh maxw-600 ml-auto aspect-square" aria-hidden="true">
             <SoftwareCoreCanvas className="absolute inset-0" section="capabilities" light={t > 0.55} />
           </div>
         </div>

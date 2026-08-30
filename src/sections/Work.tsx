@@ -37,6 +37,12 @@ export function Work() {
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 68%', toggleActions: 'play none none reverse' } }
       )
+      /* subtle parallax on the disclaimer text */
+      gsap.fromTo(
+        el.querySelector('.work-disclaimer'),
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: el.querySelector('.work-disclaimer'), start: 'top 90%', toggleActions: 'play none none reverse' } }
+      )
     }, el)
     return () => ctx.revert()
   }, [])
@@ -91,7 +97,7 @@ export function Work() {
           ))}
         </ul>
 
-        <p className="mt-14 max-w-xl text-white/40 text-body">
+        <p className="work-disclaimer mt-14 max-w-xl text-white/40 text-body" style={{ opacity: 0 }}>
           Some of our projects are private. Public case studies are coming soon — until then, we're happy to walk
           through approach and architecture directly.
         </p>
