@@ -1,0 +1,5 @@
+# 1stPodium - robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://1stpodium.com/sitemap.xml

@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-geist: 'Geist', 'Inter', 'Satoshi', system-ui, sans-serif;
+    --font-geist-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  body {
+    @apply bg-black text-white font-sans antialiased;
+    background-color: #000000;
+    color: #FFFFFF;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    @apply bg-white/20 text-white;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@layer components {
+  .container-main {
+    @apply max-w-[1600px] mx-auto px-6 md:px-12 lg:px-16;
+  }
+
+  .section {
+    @apply relative min-h-screen flex items-center justify-center;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-white via-grey-300 to-grey-100 bg-clip-text text-transparent;
+  }
+
+  .border-subtle {
+    @apply border-white/10;
+  }
+
+  .backdrop-glass {
+    @apply backdrop-blur-[20px] bg-white/5 border border-white/10;
+  }
+
+  .magnetic {
+    @apply transition-transform duration-300 ease-out;
+  }
+
+  .btn-primary {
+    @apply relative inline-flex items-center gap-3 px-8 py-4 bg-white text-black font-medium uppercase tracking-wider overflow-hidden;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    @apply hover:bg-grey-400 active:scale-[0.98] transition-all duration-300 ease-out;
+  }
+
+  .btn-primary::before {
+    content: '';
+    @apply absolute inset-0 bg-black/5 opacity-0 transition-opacity duration-300;
+  }
+
+  .btn-primary:hover::before {
+    @apply opacity-100;
+  }
+
+  .btn-secondary {
+    @apply relative inline-flex items-center gap-3 px-8 py-4 bg-transparent border border-white/20 text-white font-medium uppercase tracking-wider overflow-hidden;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    @apply hover:border-white hover:bg-white/5 active:scale-[0.98] transition-all duration-300 ease-out;
+  }
+
+  .reveal-mask {
+    overflow: hidden;
+  }
+
+  .reveal-mask > * {
+    transform: translateY(100%);
+  }
+
+  .reveal-mask.active > * {
+    animation: reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .line-reveal {
+    overflow: hidden;
+  }
+
+  .line-reveal > * {
+    transform: translateY(100%);
+  }
+
+  .line-reveal.active > * {
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .word-reveal {
+    overflow: hidden;
+    display: inline-block;
+  }
+
+  .word-reveal > * {
+    transform: translateY(100%);
+    display: inline-block;
+  }
+
+  .word-reveal.active > * {
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .char-reveal {
+    overflow: hidden;
+    display: inline-block;
+  }
+
+  .char-reveal > * {
+    transform: translateY(100%);
+    display: inline-block;
+  }
+
+  .char-reveal.active > * {
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  .grain {
+    position: relative;
+  }
+
+  .grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events: none;
+    z-index: 1000;
+    mix-blend-mode: overlay;
+  }
+
+  .grain-subtle::before {
+    opacity: 0.015;
+  }
+
+  .grid-pattern {
+    position: relative;
+  }
+
+  .grid-pattern::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .radial-glow {
+    position: relative;
+  }
+
+  .radial-glow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80vmax;
+    height: 80vmax;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .text-stroke {
+    -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+  }
+
+  .text-stroke-white {
+    -webkit-text-stroke: 1px white;
+    color: transparent;
+  }
+
+  .clip-text {
+    background-clip: text;
+    -webkit-background-clip: text;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lineDraw {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}

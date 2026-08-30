@@ -1,0 +1,6 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#000000"/>
+  <text x="600" y="280" font-family="system-ui, sans-serif" font-size="80" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="-4">1STPODIUM</text>
+  <text x="600" y="360" font-family="system-ui, sans-serif" font-size="24" font-weight="400" fill="#A0A0A0" text-anchor="middle" letter-spacing="4">SOFTWARE ENGINEERED TO PERFORM</text>
+  <line x1="400" y1="400" x2="800" y2="400" stroke="#333333" stroke-width="1"/>
+</svg>
