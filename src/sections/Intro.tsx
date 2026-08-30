@@ -1,85 +1,87 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { RevealText } from '@/components/ui/RevealText'
 import { SoftwareCoreCanvas } from '@/components/webgl/SoftwareCore'
 
-gsap.registerPlugin(ScrollTrigger)
-
 export function Intro() {
-  const sectionRef = useRef<HTMLElement>(null)
+  const root = useRef<HTMLElement>(null)
+  const lineRefs = useRef<HTMLSpanElement[]>([])
 
   useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
+    const el = root.current
+    if (!el) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 80%',
-          end: 'bottom 20%',
-          scrub: 1,
-        },
-      })
-
-      tl.fromTo(
-        '.intro-label',
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: 'expo.out' },
-        0
+      gsap.fromTo(
+        lineRefs.current,
+        { yPercent: 110 },
+        {
+          yPercent: 0,
+          stagger: 0.1,
+          duration: 1,
+          ease: 'expo.out',
+          scrollTrigger: { trigger: el, start: 'top 72%', toggleActions: 'play none none reverse' },
+        }
       )
-        .fromTo(
-          '.intro-headline .reveal-line',
-          { yPercent: 100, opacity: 0 },
-          { yPercent: 0, opacity: 1, duration: 1.2, stagger: 0.15, ease: 'expo.out' },
-          0.2
-        )
-        .fromTo(
-          '.intro-copy',
-          { y: 30, opacity: 0 },
-          { y: 0, opacity: 1, duration: 1, ease: 'expo.out' },
-          0.6
-        )
-    }, section)
-
+      gsap.fromTo(
+        el.querySelectorAll('.intro-fade'),
+        { opacity: 0, y: 18 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.08,
+          duration: 0.7,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 72%', toggleActions: 'play none none reverse' },
+        }
+      )
+    }, el)
     return () => ctx.revert()
   }, [])
 
+  const lines = [
+    { text: 'WE DON’T JUST', outline: false },
+    { text: 'WRITE CODE.', outline: true },
+    { text: 'WE ENGINEER', outline: false },
+    { text: 'DIGITAL SYSTEMS.', outline: false },
+  ]
+  const isOutline = (i: number) => i === 1
+
   return (
-    <section
-      ref={sectionRef}
-      className="intro relative min-h-screen flex items-center bg-black border-t border-white/10"
-      aria-labelledby="intro-heading"
-    >
-      <div className="absolute inset-0 grain grain-subtle" aria-hidden="true" />
-      <div className="absolute inset-0 grid-pattern" aria-hidden="true" />
-      <div className="absolute inset-0 radial-glow" aria-hidden="true" />
+    <section ref={root} className="relative section bg-black overflow-hidden" aria-label="What we do">
+      <div className="bg-env" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
 
-      <div className="container-main relative z-10 py-20 lg:py-32">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          <div className="relative z-20">
-            <RevealText as="p" type="lines" className="intro-label text-micro font-medium text-grey-200 uppercase tracking-widest mb-6" stagger={0.1} duration={0.6}>
-              <span>01 / 07  WHAT WE DO</span>
-            </RevealText>
+      <div className="container-main relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <p className="label intro-fade mb-10" data-index="01 / 07" style={{ opacity: 0 }}>
+            WHAT WE DO
+          </p>
 
-            <RevealText as="h2" id="intro-heading" type="lines" className="intro-headline mb-10" stagger={0.12} duration={1}>
-              <span className="text-display font-bold tracking-tighter text-white">WE DON'T JUST</span>
-              <span className="text-display font-bold tracking-tighter text-white">WRITE CODE.</span>
-              <span className="text-display font-bold tracking-tighter text-white">WE ENGINEER</span>
-              <span className="text-display font-bold tracking-tighter text-white">DIGITAL SYSTEMS.</span>
-            </RevealText>
+          <h2 className="text-white font-bold tracking-tighter" style={{ fontSize: 'clamp(42px,5.5vw,88px)', lineHeight: 0.98 }}>
+            {lines.map((l, i) => (
+              <span key={i} className="block overflow-hidden py-track">
+                <span
+                  ref={(el) => { if (el) lineRefs.current[i] = el }}
+                  className={`block will-change-transform ${isOutline(i) ? 'text-stroke' : ''}`}
+                >
+                  {l.text}
+                </span>
+              </span>
+            ))}
+          </h2>
 
-            <RevealText as="p" type="lines" className="intro-copy text-body-lg text-grey-200 max-w-xl leading-relaxed" stagger={0.1} duration={0.8}>
-              <span>1stPodium designs, develops and evolves custom digital products across web, mobile, desktop and backend infrastructure.</span>
-            </RevealText>
-          </div>
+          <p className="intro-fade mt-8 max-w-md text-white/60 text-body-lg" style={{ opacity: 0 }}>
+            1stPodium designs, develops and evolves custom digital products across web, mobile, desktop and
+            backend infrastructure.
+          </p>
+        </div>
 
-          <div className="relative lg:ml-auto" style={{ minHeight: '400px', height: '60vh' }}>
-            <SoftwareCoreCanvas section="services" className="w-full h-full" />
-          </div>
+        <div className="relative w-full h-60vh minh-420 lg-h-70vh">
+          <SoftwareCoreCanvas className="absolute inset-0" section="services" />
         </div>
       </div>
     </section>

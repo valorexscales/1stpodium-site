@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { Suspense } from 'react'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import '../styles/globals.css'
 import { Providers } from '@/components/Providers'
@@ -10,6 +9,7 @@ import { PageTransition } from '@/components/PageTransition'
 import { Preloader } from '@/components/Preloader'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://1stpodium-site.vercel.app'),
   title: {
     default: '1stPodium — Software Engineered to Perform',
     template: '%s | 1stPodium',
@@ -83,27 +83,38 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const orgLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: '1stPodium',
+    url: 'https://1stpodium-site.vercel.app',
+    logo: 'https://1stpodium-site.vercel.app/1STPodium.png',
+    description: 'Software engineering company. Custom software engineered from architecture to deployment.',
+  }
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
+        />
       </head>
       <body className="bg-black text-white antialiased">
         <Providers>
           <Preloader />
-          <Suspense fallback={<div className="fixed inset-0 bg-black" />}>
-            <PageTransition>
-              <CustomCursor />
-              <Header />
-              <main id="main-content" className="relative z-10">
-                {children}
-              </main>
-              <Footer />
-            </PageTransition>
-          </Suspense>
+          <PageTransition>
+            <CustomCursor />
+            <Header />
+            <main id="main-content" className="relative z-10">
+              {children}
+            </main>
+            <Footer />
+          </PageTransition>
         </Providers>
       </body>
     </html>

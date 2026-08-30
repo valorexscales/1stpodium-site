@@ -1,170 +1,95 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { RevealText } from '@/components/ui/RevealText'
-import { SoftwareCoreCanvas } from '@/components/webgl/SoftwareCore'
 import Link from 'next/link'
-import { MagneticButton } from '@/components/ui/MagneticButton'
 import Image from 'next/image'
-
-gsap.registerPlugin(ScrollTrigger)
+import { gsap } from 'gsap'
+import { SoftwareCoreCanvas } from '@/components/webgl/SoftwareCore'
 
 export function FinalCTA() {
-  const sectionRef = useRef<HTMLElement>(null)
+  const root = useRef<HTMLElement>(null)
+  const lineRefs = useRef<HTMLSpanElement[]>([])
+  const coreWrap = useRef<HTMLDivElement>(null)
+  const logoRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
+    const el = root.current
+    if (!el) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.cta-headline .reveal-line',
-        { yPercent: 100, opacity: 0 },
-        {
-          yPercent: 0,
-          opacity: 1,
-          duration: 1.2,
-          stagger: 0.15,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      )
-
-      gsap.fromTo(
-        '.cta-copy',
-        { y: 30, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: '.cta-copy',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-          delay: 0.3,
-        }
-      )
-
-      gsap.fromTo(
-        '.cta-buttons',
-        { y: 30, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          stagger: 0.1,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: '.cta-buttons',
-            start: 'top 90%',
-            toggleActions: 'play none none reverse',
-          },
-          delay: 0.5,
-        }
-      )
-
-      gsap.fromTo(
-        '.cta-logo',
-        { scale: 0.5, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 1.5,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: '.cta-logo',
-            start: 'top 90%',
-            toggleActions: 'play none none reverse',
-          },
-          delay: 1,
-        }
-      )
-
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1,
-        onUpdate: (self) => {
-          const progress = self.progress
-          // The 3D object converges as we approach the CTA
-          gsap.to('.cta-3d-object', {
-            scale: 1 - progress * 0.5,
-            opacity: 1 - progress,
-            duration: 0.5,
-            ease: 'none',
-          })
-        },
+      gsap.fromTo(el.querySelectorAll('.cta-fade'), { opacity: 0, y: 16 }, {
+        opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 75%', toggleActions: 'play none none reverse' },
       })
-    }, section)
-
+      gsap.fromTo(lineRefs.current, { yPercent: 110 }, {
+        yPercent: 0, stagger: 0.1, duration: 1, ease: 'expo.out',
+        scrollTrigger: { trigger: el, start: 'top 70%', toggleActions: 'play none none reverse' },
+      })
+      gsap.fromTo(coreWrap.current, { opacity: 0, scale: 0.9 }, {
+        opacity: 1, scale: 1, duration: 1.2, ease: 'expo.out',
+        scrollTrigger: { trigger: el, start: 'top 65%', toggleActions: 'play none none reverse' },
+      })
+      gsap.fromTo(logoRef.current, { opacity: 0, scale: 0.85 }, {
+        opacity: 0.7, scale: 1, duration: 1.4, ease: 'expo.out',
+        scrollTrigger: { trigger: logoRef.current, start: 'top 88%', toggleActions: 'play none none reverse' },
+      })
+    }, el)
     return () => ctx.revert()
   }, [])
 
+  const lines = ["LET'S BUILD", 'WHAT’S NEXT.']
+
   return (
-    <section
-      ref={sectionRef}
-      className="cta relative min-h-screen flex items-center justify-center bg-black border-t border-white/10"
-      aria-labelledby="cta-heading"
-    >
-      <div className="absolute inset-0 grain grain-subtle" aria-hidden="true" />
-      <div className="absolute inset-0 grid-pattern" aria-hidden="true" />
-      <div className="absolute inset-0 radial-glow" aria-hidden="true" />
+    <section ref={root} className="relative section bg-black overflow-hidden" aria-label="Start a project">
+      <div className="bg-env" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
 
-      <div className="container-main relative z-10 py-20 lg:py-32 text-center">
-        <div className="relative max-w-4xl mx-auto" style={{ minHeight: '600px' }}>
-          <div className="absolute inset-0 cta-3d-object" style={{ zIndex: 1 }}>
-            <SoftwareCoreCanvas section="cta" className="w-full h-full" />
+      <div className="container-main relative z-10">
+        <p className="label cta-fade mb-8" data-index="09 / START" style={{ opacity: 0 }}>
+          HAVE A PROJECT?
+        </p>
+
+        <h2 className="text-white font-bold tracking-tighter" style={{ fontSize: 'clamp(64px,9vw,140px)', lineHeight: 0.94 }}>
+          {lines.map((l, i) => (
+            <span key={i} className="block overflow-hidden py-track">
+              <span ref={(e) => { if (e) lineRefs.current[i] = e }} className="block will-change-transform">
+                {l}
+              </span>
+            </span>
+          ))}
+        </h2>
+
+        <div className="mt-10 flex flex-wrap gap-4 cta-fade" style={{ opacity: 0 }}>
+          <Link href="/contact" className="btn-primary" data-cursor-text="START A PROJECT">
+            START A PROJECT
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
+          <Link href="/contact" className="btn-secondary" data-cursor-text="CONTACT US">
+            CONTACT US
+          </Link>
+        </div>
+
+        {/* core slowly reconstructs behind — then fades; official mark remains */}
+        <div className="relative mt-16 h-40vh minh-300" aria-hidden="true">
+          <div ref={coreWrap} className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-full maxw-38vw" style={{ opacity: 0 }}>
+            <SoftwareCoreCanvas className="absolute inset-0" section="cta" />
           </div>
+        </div>
 
-          <div className="relative z-20">
-            <RevealText as="h2" id="cta-heading" type="lines" className="cta-headline mb-8" stagger={0.12} duration={1}>
-              <span className="text-hero font-bold tracking-tighter text-white">HAVE AN</span>
-              <span className="text-hero font-bold tracking-tighter text-white">IDEA?</span>
-            </RevealText>
-
-            <RevealText as="p" type="lines" className="cta-copy text-body-lg text-grey-200 leading-relaxed mb-16" stagger={0.1} duration={0.8}>
-              <span className="text-title font-medium tracking-tight">LET'S BUILD IT.</span>
-            </RevealText>
-
-            <RevealText as="p" type="lines" className="cta-copy text-small text-grey-100 uppercase tracking-wider mb-16" stagger={0.1} duration={0.8}>
-              <span>FROM FIRST ARCHITECTURE</span>
-              <span>TO PRODUCTION.</span>
-            </RevealText>
-
-            <div className="cta-buttons flex flex-col sm:flex-row items-center justify-center gap-6">
-              <MagneticButton variant="primary" data-cursor-text="START A PROJECT">
-                <Link href="/contact" className="inline-flex">
-                  START A PROJECT
-                </Link>
-              </MagneticButton>
-              <MagneticButton variant="secondary" data-cursor-text="CONTACT US">
-                <Link href="/contact" className="inline-flex">
-                  CONTACT US
-                </Link>
-              </MagneticButton>
-            </div>
-
-            <div className="cta-logo mt-24 relative">
-              <Image
-                src="/1STPodium.png"
-                alt="1stPodium"
-                width={200}
-                height={200}
-                className="mx-auto grayscale opacity-80 hover:opacity-100 transition-opacity duration-500"
-                priority
-                unoptimized
-              />
-            </div>
-          </div>
+        <div ref={logoRef} className="flex justify-center pt-8" style={{ opacity: 0 }}>
+          <Image
+            src="/1STPodium.png"
+            alt="1stPodium"
+            width={210}
+            height={76}
+            className="w-auto h-auto max-h-12 object-contain"
+            priority
+            unoptimized
+          />
         </div>
       </div>
     </section>

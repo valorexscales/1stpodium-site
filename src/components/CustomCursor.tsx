@@ -3,151 +3,95 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 
-interface CursorPosition {
-  x: number
-  y: number
-}
-
 export function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null)
-  const cursorInnerRef = useRef<HTMLDivElement>(null)
-  const cursorTextRef = useRef<HTMLSpanElement>(null)
-  const [position, setPosition] = useState<CursorPosition>({ x: 0, y: 0 })
-  const [targetPosition, setTargetPosition] = useState<CursorPosition>({ x: 0, y: 0 })
-  const [isVisible, setIsVisible] = useState(false)
-  const [isInteractive, setIsInteractive] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
-  const [cursorText, setCursorText] = useState('')
-  const animationRef = useRef<number>()
+  const ringRef = useRef<HTMLDivElement>(null)
+  const labelRef = useRef<HTMLDivElement>(null)
+  const [mode, setMode] = useState<'default' | 'active' | 'view'>('default')
+  const [label, setLabel] = useState('VIEW')
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-
-    if (prefersReducedMotion || isTouch) return
+    const isTouch = window.matchMedia('(pointer: coarse)').matches
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (isTouch || prefersReduced) return
 
     const cursor = cursorRef.current
-    const cursorInner = cursorInnerRef.current
+    const ring = ringRef.current
+    const labelEl = labelRef.current
+    if (!cursor || !ring || !labelEl) return
 
-    if (!cursor || !cursorInner) return
+    gsap.set(cursor, { xPercent: -50, yPercent: -50 })
+    gsap.set(ring, { xPercent: -50, yPercent: -50, scale: 0 })
 
-    setIsVisible(true)
+    const moveX = gsap.quickTo(cursor, 'x', { duration: 0.35, ease: 'power3.out' })
+    const moveY = gsap.quickTo(cursor, 'y', { duration: 0.35, ease: 'power3.out' })
+    const ringX = gsap.quickTo(ring, 'x', { duration: 0.5, ease: 'power3.out' })
+    const ringY = gsap.quickTo(ring, 'y', { duration: 0.5, ease: 'power3.out' })
 
-    const updatePosition = () => {
-      const dx = targetPosition.x - position.x
-      const dy = targetPosition.y - position.y
+    let visible = false
 
-      const newX = position.x + dx * 0.15
-      const newY = position.y + dy * 0.15
-
-      setPosition({ x: newX, y: newY })
-
-      if (cursor) {
-        cursor.style.transform = `translate(${newX}px, ${newY}px)`
-      }
-
-      animationRef.current = requestAnimationFrame(updatePosition)
+    const onMove = (e: MouseEvent) => {
+      if (!visible) return
+      moveX(e.clientX)
+      moveY(e.clientY)
+      ringX(e.clientX)
+      ringY(e.clientY)
     }
 
-    animationRef.current = requestAnimationFrame(updatePosition)
-
-    const handleMouseMove = (e: MouseEvent) => {
-      setTargetPosition({ x: e.clientX, y: e.clientY })
-    }
-
-    const handleMouseEnter = () => setIsVisible(true)
-    const handleMouseLeave = () => setIsVisible(false)
-
-    const handleMouseDown = () => setIsDragging(true)
-    const handleMouseUp = () => setIsDragging(false)
-
-    const handleInteractiveEnter = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      const text = target.getAttribute('data-cursor-text')
-      if (text) {
-        setCursorText(text)
-        setIsInteractive(true)
+    const onOver = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest('[data-cursor-text]') as HTMLElement | null
+      if (target) {
+        const text = target.getAttribute('data-cursor-text') || 'VIEW'
+        setLabel(text)
+        setMode('view')
+        gsap.to(ring, { scale: 2.6, opacity: 1, duration: 0.35, ease: 'expo.out' })
+      } else {
+        setMode('default')
+        gsap.to(ring, { scale: 0, opacity: 0, duration: 0.35, ease: 'expo.out' })
       }
     }
 
-    const handleInteractiveLeave = () => {
-      setIsInteractive(false)
-      setCursorText('')
+    const onEnter = () => {
+      visible = true
+      gsap.to(cursor, { opacity: 1, duration: 0.3 })
+    }
+    const onLeave = () => {
+      visible = false
+      gsap.to(cursor, { opacity: 0, duration: 0.3 })
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseenter', handleMouseEnter)
-    document.addEventListener('mouseleave', handleMouseLeave)
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('mouseup', handleMouseUp)
-    document.addEventListener('mouseover', handleInteractiveEnter)
-    document.addEventListener('mouseout', handleInteractiveLeave)
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseover', onOver)
+    document.documentElement.addEventListener('mouseenter', onEnter)
+    document.documentElement.addEventListener('mouseleave', onLeave)
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseenter', handleMouseEnter)
-      document.removeEventListener('mouseleave', handleMouseLeave)
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.removeEventListener('mouseover', handleInteractiveEnter)
-      document.removeEventListener('mouseout', handleInteractiveLeave)
-      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseover', onOver)
+      document.documentElement.removeEventListener('mouseenter', onEnter)
+      document.documentElement.removeEventListener('mouseleave', onLeave)
+      gsap.killTweensOf(cursor)
+      gsap.killTweensOf(ring)
     }
-  }, [position, targetPosition])
-
-  if (typeof window === 'undefined') return null
-
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-
-  if (prefersReducedMotion || isTouch) return null
+  }, [])
 
   return (
-    <div
-      ref={cursorRef}
-      className="fixed top-0 left-0 pointer-events-none z-[9999] transition-opacity duration-300 select-none"
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        willChange: 'transform, opacity',
-      }}
-      aria-hidden="true"
-    >
+    <div className="hidden lg:block" aria-hidden="true">
+      {/* small white point */}
       <div
-        ref={cursorInnerRef}
-        className="relative w-1.5 h-1.5 rounded-full bg-white/80 mix-blend-difference"
-        style={{
-          transform: isInteractive ? 'scale(4)' : isDragging ? 'scale(2.5)' : 'scale(1)',
-          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          willChange: 'transform',
-        }}
+        ref={cursorRef}
+        className="pointer-events-none fixed left-0 top-0 z-9900 w-2 h-2 rounded-full bg-white opacity-0"
+        style={{ mixBlendMode: mode === 'view' ? 'normal' : 'difference' }}
+      />
+      {/* expandable ring for interactive elements */}
+      <div
+        ref={ringRef}
+        className="pointer-events-none fixed left-0 top-0 z-9899 w-14 h-14 rounded-full border border-white/40 flex items-center justify-center opacity-0"
       >
-        {isInteractive && (
-          <span
-            ref={cursorTextRef}
-            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap text-micro font-medium text-white/70 opacity-0"
-            style={{
-              opacity: isInteractive ? 1 : 0,
-              transition: 'opacity 0.2s ease-out, transform 0.3s ease-out',
-              transform: isInteractive ? 'translateX(0)' : 'translateX(10px)',
-            }}
-          >
-            {cursorText}
-          </span>
-        )}
+        <span ref={labelRef} className="u-0-55rem track-18 uppercase text-white/90 font-medium">
+          {label}
+        </span>
       </div>
-
-      {isInteractive && (
-        <div
-          className="absolute -top-3 -left-3 w-10 h-10 rounded-full border border-white/20"
-          style={{
-            transform: 'scale(4)',
-            animation: 'pulseSubtle 2s ease-in-out infinite',
-          }}
-        />
-      )}
     </div>
   )
 }

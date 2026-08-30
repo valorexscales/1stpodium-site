@@ -2,239 +2,115 @@
 
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { RevealText } from '@/components/ui/RevealText'
-import { SoftwareCoreCanvas } from '@/components/webgl/SoftwareCore'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const stages = [
-  {
-    id: 'discovery',
-    index: '01',
-    title: 'DISCOVERY',
-    description: 'Deep dive into requirements, constraints, and opportunities. We understand before we build.',
-  },
-  {
-    id: 'architecture',
-    index: '02',
-    title: 'ARCHITECTURE',
-    description: 'System design, technology selection, data models, API contracts, and infrastructure planning.',
-  },
-  {
-    id: 'product-design',
-    index: '03',
-    title: 'PRODUCT DESIGN',
-    description: 'UX research, interaction design, design systems, prototyping, and usability validation.',
-  },
-  {
-    id: 'engineering',
-    index: '04',
-    title: 'ENGINEERING',
-    description: 'Clean code, modular architecture, automated testing, code reviews, and continuous integration.',
-  },
-  {
-    id: 'quality',
-    index: '05',
-    title: 'QUALITY',
-    description: 'E2E testing, performance profiling, security auditing, accessibility compliance, load testing.',
-  },
-  {
-    id: 'deployment',
-    index: '06',
-    title: 'DEPLOYMENT',
-    description: 'Production rollout, monitoring setup, CI/CD pipelines, disaster recovery, and runbooks.',
-  },
-  {
-    id: 'evolution',
-    index: '07',
-    title: 'EVOLUTION',
-    description: 'Ongoing maintenance, feature development, scaling, modernization, and technical debt management.',
-  },
+  { index: '01', title: 'DISCOVERY', desc: 'Deep dive into requirements, constraints and opportunities.' },
+  { index: '02', title: 'ARCHITECTURE', desc: 'System design, technology selection and data models.' },
+  { index: '03', title: 'PRODUCT DESIGN', desc: 'UX research, prototypes and design systems.' },
+  { index: '04', title: 'ENGINEERING', desc: 'Clean code, reviews, automated testing, CI/CD.' },
+  { index: '05', title: 'QUALITY', desc: 'E2E tests, performance profiling, security auditing.' },
+  { index: '06', title: 'DEPLOYMENT', desc: 'Production rollout, monitoring and runbooks.' },
+  { index: '07', title: 'EVOLUTION', desc: 'Maintenance, scaling and modernization.' },
 ]
 
 export function Process() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const pathRef = useRef<SVGPathElement>(null)
-  const stageRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const root = useRef<HTMLElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const fillRef = useRef<HTMLDivElement>(null)
+  const items = useRef<(HTMLElement | null)[]>([])
+  const active = useRef(0)
 
   useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
+    const el = root.current
+    if (!el) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+
+    const onUpdate = (i: number) => {
+      const idx = Math.min(i, stages.length - 1)
+      if (idx === active.current) return
+      active.current = idx
+      items.current.forEach((item, k) => {
+        if (!item) return
+        const activeStage = k <= idx
+        item.style.opacity = activeStage ? '1' : '0.38'
+        item.style.transform = activeStage ? 'translateX(0)' : 'translateX(-6px)'
+        item.style.transition = 'opacity 0.5s ease, transform 0.5s ease'
+      })
+    }
+
+    active.current = -1
+    onUpdate(0)
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        '.process-headline .reveal-line',
-        { yPercent: 100, opacity: 0 },
-        {
-          yPercent: 0,
-          opacity: 1,
-          duration: 1.2,
-          stagger: 0.15,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
-          },
-        }
+        el.querySelectorAll('.process-head'),
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.7, stagger: 0.06, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 70%', toggleActions: 'play none none reverse' } }
       )
+    }, el)
 
-      const path = pathRef.current
-      if (path) {
-        const pathLength = path.getTotalLength()
-        gsap.fromTo(
-          path,
-          { strokeDashoffset: pathLength },
-          {
-            strokeDashoffset: 0,
-            duration: 2,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: section,
-              start: 'top 80%',
-              end: 'bottom 20%',
-              scrub: 1,
-            },
-          }
-        )
-      }
+    // daytime minimal scroll-driven activation without breaking rows readability
+    const st = gsap.to(fillRef.current, {
+      scaleY: 1,
+      transformOrigin: 'top center',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 55%',
+        end: 'bottom 80%',
+        scrub: 0.6,
+        onUpdate: (self) => onUpdate(Math.floor(self.progress * stages.length)),
+      },
+    })
 
-      stages.forEach((stage, index) => {
-        const stageEl = stageRefs.current.get(stage.id)
-        if (!stageEl) return
-
-        gsap.fromTo(
-          stageEl,
-          { x: index % 2 === 0 ? -60 : 60, opacity: 0 },
-          {
-            x: 0,
-            opacity: 1,
-            duration: 0.8,
-            ease: 'expo.out',
-            scrollTrigger: {
-              trigger: stageEl,
-              start: 'top 85%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        )
-
-        ScrollTrigger.create({
-          trigger: stageEl,
-          start: 'top 60%',
-          end: 'bottom 40%',
-          onEnter: () => stageEl.classList.add('active'),
-          onLeave: () => stageEl.classList.remove('active'),
-          onEnterBack: () => stageEl.classList.add('active'),
-          onLeaveBack: () => stageEl.classList.remove('active'),
-        })
-      })
-
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1,
-        onUpdate: (self) => {
-          const progress = self.progress
-          stages.forEach((stage, index) => {
-            const meshName = `layer-${index}`
-          })
-        },
-      })
-    }, section)
-
-    return () => ctx.revert()
+    return () => {
+      ctx.revert()
+      st.scrollTrigger?.kill()
+      st.kill()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const pathData = 'M 100 100 Q 250 100 400 100 Q 550 100 700 100 Q 850 100 1000 100 Q 1150 100 1300 100 Q 1450 100 1600 100 Q 1750 100 1900 100'
-
   return (
-    <section
-      ref={sectionRef}
-      className="process relative min-h-screen flex items-center bg-black border-t border-white/10 overflow-hidden"
-      aria-labelledby="process-heading"
-    >
-      <div className="absolute inset-0 grain grain-subtle" aria-hidden="true" />
-      <div className="absolute inset-0 grid-pattern" aria-hidden="true" />
-      <div className="absolute inset-0 radial-glow" aria-hidden="true" />
+    <section ref={root} className="relative section bg-black overflow-hidden" aria-label="Process">
+      <div className="bg-env" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
 
-      <div className="container-main relative z-10 py-20 lg:py-32">
-        <RevealText as="h2" id="process-heading" type="lines" className="process-headline mb-16 lg:mb-24 max-w-2xl" stagger={0.12} duration={1}>
-          <span className="text-display font-bold tracking-tighter text-white">FROM IDEA</span>
-          <span className="text-display font-bold tracking-tighter text-white">TO PRODUCTION.</span>
-        </RevealText>
+      <div className="container-main relative z-10">
+        <p className="label process-head mb-10" data-index="04 / PROCESS">HOW WE DELIVER</p>
 
-        <div className="relative" style={{ minHeight: '700px' }}>
-          <div className="absolute inset-0" style={{ zIndex: 1 }}>
-            <SoftwareCoreCanvas section="process" className="w-full h-full" />
-          </div>
+        <h2 className="process-head text-white font-bold tracking-tighter mb-16" style={{ fontSize: 'clamp(42px,5vw,80px)', lineHeight: 1.02, opacity: 0 }}>
+          FROM IDEA
+          <br />
+          TO PRODUCTION.
+        </h2>
 
-          <div className="relative z-10">
-            <svg className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px" viewBox="0 0 2 800" preserveAspectRatio="none" aria-hidden="true">
-              <path
-                ref={pathRef}
-                d="M 1 0 L 1 800"
-                stroke="white"
-                strokeWidth="1"
-                strokeDasharray="8 12"
-                strokeLinecap="round"
-                opacity="0.2"
-              />
-              <path
-                ref={pathRef}
-                d="M 1 0 L 1 800"
-                stroke="white"
-                strokeWidth="2"
-                strokeDasharray="800 800"
-                strokeDashoffset="800"
-                strokeLinecap="round"
-                className="process-path"
-              />
-              {stages.map((stage, index) => (
-                <circle
-                  key={stage.id}
-                  cx="1"
-                  cy={100 + index * 100}
-                  r="6"
-                  fill="white"
-                  className="stage-marker"
-                  style={{ opacity: 0.3, transition: 'opacity 0.5s ease-out' }}
+        <div className="relative">
+          {/* vertical progress rail — thin grey lines, white active fill */}
+          <div ref={trackRef} className="absolute left-7 top-1 bottom-1 w-px bg-white/10" aria-hidden="true" />
+          <div ref={fillRef} className="absolute left-7 top-1 bottom-1 w-px bg-white origin-top" style={{ transform: 'scaleY(0)' }} aria-hidden="true" />
+
+          <ol className="space-y-12 pl-9">
+            {stages.map((s, i) => (
+              <li
+                key={s.index}
+                ref={(el) => { items.current[i] = el }}
+                className={`stage-item relative transition-colors duration-500 ${i === 0 ? 'stage-active' : ''}`}
+              >
+                <span
+                  className="absolute left-neg35 top-1.5 w-15 rounded-full border transition-all duration-500"
+                  style={{ borderColor: 'rgba(255,255,255,0.22)', background: '#000' }}
+                  aria-hidden="true"
                 />
-              ))}
-            </svg>
-
-            <div className="pl-20 lg:pl-32 space-y-20">
-              {stages.map((stage, index) => (
-                <div
-                  key={stage.id}
-                  ref={(el) => {
-                    if (el) stageRefs.current.set(stage.id, el)
-                  }}
-                  className="process-stage relative group"
-                  style={{ minHeight: '120px' }}
-                >
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 lg:w-12 lg:h-12 rounded-full border-2 border-white/20 flex items-center justify-center bg-black transition-all duration-500 group-hover:border-white group-active:border-white">
-                    <span className="text-micro font-mono font-bold text-white/50 group-hover:text-white group-active:text-black transition-colors">
-                      {stage.index}
-                    </span>
-                  </div>
-
-                  <div className="ml-16 lg:ml-20">
-                    <h3 className="text-title font-bold tracking-tight text-white mb-3 transition-colors group-hover:text-white group-active:text-white">
-                      {stage.title}
-                    </h3>
-                    <p className="text-body text-grey-100 max-w-xl leading-relaxed">
-                      {stage.description}
-                    </p>
-                  </div>
-
-                  <div className="absolute left-1/2 -translate-x-1/2 top-1/2 w-4 h-4 rounded-full bg-white/10 transition-all duration-500 group-active:bg-white group-active:scale-150" aria-hidden="true" />
-                </div>
-              ))}
-            </div>
-          </div>
+                <p className="font-mono u-0-7rem track-2 text-white/35 mb-2">{s.index}</p>
+                <h3 className="text-white font-medium tracking-tight transition-opacity duration-500" style={{ fontSize: 'clamp(24px,2.6vw,40px)', opacity: 1 }}>
+                  {s.title}
+                </h3>
+                <p className="mt-2 max-w-md text-white/45 text-body transition-opacity duration-500">{s.desc}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
     </section>

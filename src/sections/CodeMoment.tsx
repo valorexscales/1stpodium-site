@@ -2,136 +2,87 @@
 
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { RevealText } from '@/components/ui/RevealText'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const codeLines = [
-  'class SoftwareCore {',
-  '  constructor(architecture: Architecture) {',
-  '    this.layers = architecture.decompose()',
-  '    this.contracts = new Map<Interface, Implementation>()',
-  '  }',
-  '',
-  '  async deploy(): Promise<DeploymentResult> {',
-  '    const validated = await this.validate()',
-  '    const optimized = this.optimize(validated)',
-  '    return this.pipeline.execute(optimized)',
-  '  }',
-  '',
-  '  private optimize(code: CodeBase): OptimizedCode {',
-  '    return code',
-  '      .treeShake()',
-  '      .minify()',
-  '      .splitChunks()',
-  '      .prefetchCritical()',
-  '  }',
-  '}',
-  '',
-  '// Engineering is in the details.',
-  'const core = new SoftwareCore(architecture)',
-  'await core.deploy()',
+  { text: 'export class SoftwareCore {', accent: 'keyword' },
+  { text: '  constructor(architecture: Architecture) {', accent: 'plain' },
+  { text: '    this.layers = await architecture.decompose()', accent: 'plain' },
+  { text: '    this.contracts = design.contracts.resolve()', accent: 'plain' },
+  { text: '  }', accent: 'plain' },
+  { text: '', accent: 'plain' },
+  { text: '  async deploy(): Promise<Deployment> {', accent: 'plain' },
+  { text: '    const tested   = await this.runSuite()', accent: 'plain' },
+  { text: '    const optimized = this.optimize(tested)', accent: 'plain' },
+  { text: '    return this.pipeline.execute(optimized)', accent: 'plain' },
+  { text: '  }', accent: 'plain' },
+  { text: '}', accent: 'plain' },
+  { text: '', accent: 'plain' },
+  { text: '// Engineering is in the details.', accent: 'comment' },
 ]
 
 export function CodeMoment() {
-  const sectionRef = useRef<HTMLElement>(null)
+  const root = useRef<HTMLElement>(null)
+  const lineRefs = useRef<(HTMLElement | null)[]>([])
 
   useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
+    const el = root.current
+    if (!el) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        '.codemoment-headline .reveal-line',
-        { yPercent: 100, opacity: 0 },
-        {
-          yPercent: 0,
-          opacity: 1,
-          duration: 1.2,
-          stagger: 0.15,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
-          },
-        }
+        el.querySelectorAll('.code-head'),
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.7, stagger: 0.06, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 72%', toggleActions: 'play none none reverse' } }
       )
-
       gsap.fromTo(
-        '.code-line',
-        { opacity: 0, x: -30 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.6,
-          stagger: 0.04,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: '.code-block',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        }
+        lineRefs.current,
+        { opacity: 0, x: -12 },
+        { opacity: 1, x: 0, stagger: 0.04, duration: 0.5, ease: 'power2.out', scrollTrigger: { trigger: '.code-block', start: 'top 82%', toggleActions: 'play none none reverse' } }
       )
-    }, section)
-
+    }, el)
     return () => ctx.revert()
   }, [])
 
+  const color = (accent: string) =>
+    accent === 'keyword' ? 'text-white' : accent === 'comment' ? 'text-white/35' : 'text-white/70'
+
   return (
-    <section
-      ref={sectionRef}
-      className="codemoment relative min-h-screen flex items-center bg-black border-t border-white/10"
-      aria-labelledby="codemoment-heading"
-    >
-      <div className="absolute inset-0 grain grain-subtle" aria-hidden="true" />
-      <div className="absolute inset-0 grid-pattern" aria-hidden="true" />
-      <div className="absolute inset-0 radial-glow" aria-hidden="true" />
+    <section ref={root} className="relative section bg-black overflow-hidden" aria-label="Engineering is in the details">
+      <div className="bg-env" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
 
-      <div className="container-main relative z-10 py-20 lg:py-32">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
-          <div className="relative z-20">
-            <RevealText as="h2" id="codemoment-heading" type="lines" className="codemoment-headline mb-10" stagger={0.12} duration={1}>
-              <span className="text-display font-bold tracking-tighter text-white">ENGINEERING</span>
-              <span className="text-display font-bold tracking-tighter text-white">IS IN THE</span>
-              <span className="text-display font-bold tracking-tighter text-white">DETAILS.</span>
-            </RevealText>
+      <div className="container-main relative z-10 grid lg:grid-cols-2 gap-14 items-center">
+        <div>
+          <p className="label code-head mb-10" data-index="06 / CRAFT">PRECISION</p>
+          <h2 className="text-white font-bold tracking-tighter code-head" style={{ fontSize: 'clamp(42px,5.5vw,88px)', lineHeight: 0.98, opacity: 0 }}>
+            ENGINEERING
+            <br />
+            IS IN THE
+            <br />
+            DETAILS.
+          </h2>
+        </div>
 
-            <RevealText as="p" type="lines" className="text-body-lg text-grey-200 leading-relaxed max-w-xl" stagger={0.1} duration={0.8}>
-              <span>Clean abstractions. Explicit contracts. Zero runtime surprises. The best code reads like documentation.</span>
-            </RevealText>
-          </div>
-
-          <div className="relative code-block">
-            <div className="bg-black-100 border border-white/10 rounded-xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3 bg-black">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/60" />
-                </div>
-                <span className="text-micro font-mono text-grey-100 ml-4">software-core.ts</span>
-              </div>
-
-              <pre className="p-6 lg:p-8 overflow-x-auto font-mono text-sm leading-relaxed text-grey-300">
-                <code className="language-typescript">
-                  {codeLines.map((line, index) => (
-                    <div key={index} className="code-line" style={{ opacity: 0 }}>
-                      <span className="text-grey-100 select-none pr-4" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-                      {line === '' ? (
-                        <span />
-                      ) : (
-                        <span>{line.replace(/(\/\/.*$)/, '<span class="text-grey-1">$1</span>')}</span>
-                      )}
-                    </div>
-                  ))}
-                </code>
-              </pre>
+        <div className="code-block">
+          <div className="border hairline bg-black-100 rounded overflow-hidden">
+            <div className="flex items-center gap-2 px-5 py-3 border-b hairline">
+              <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+              <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+              <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+              <span className="ml-3 font-mono u-0-65rem text-white/35 tracking-wider">software-core.ts</span>
             </div>
-
-            <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-tr from-white/5 to-transparent rounded-full blur-2xl opacity-0" style={{ opacity: 0.1 }} aria-hidden="true" />
+            <pre className="p-6 overflow-x-auto">
+              <code>
+                {codeLines.map((line, i) => (
+                  <div key={i} ref={(el) => { lineRefs.current[i] = el }} className="flex gap-4 font-mono text-xs leading-loose" style={{ opacity: 0 }}>
+                    <span className="select-none text-white/20 w-4 text-right shrink-0">{i + 1}</span>
+                    <span className={`whitespace-pre ${color(line.accent)}`}>{line.text || ' '}</span>
+                  </div>
+                ))}
+              </code>
+            </pre>
           </div>
         </div>
       </div>

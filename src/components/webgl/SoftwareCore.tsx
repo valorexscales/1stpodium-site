@@ -1,370 +1,369 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
-import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
+import { useMemo, useRef, useEffect, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(ScrollTrigger)
-
-extend({
-  Group: THREE.Group,
-  Points: THREE.Points,
-  LineSegments: THREE.LineSegments,
-  Mesh: THREE.Mesh,
-  BufferGeometry: THREE.BufferGeometry,
-  BufferAttribute: THREE.BufferAttribute,
-  PointsMaterial: THREE.PointsMaterial,
-  LineBasicMaterial: THREE.LineBasicMaterial,
-  MeshBasicMaterial: THREE.MeshBasicMaterial,
-  PlaneGeometry: THREE.PlaneGeometry,
-})
+const NODE_COUNT = 160
+const LINK_DIST = 2.4
+const CORE_SIZE = 1.5
 
 interface SoftwareCoreProps {
-  scrollProgress?: number
   section?: 'hero' | 'services' | 'capabilities' | 'process' | 'cta'
   className?: string
+  light?: boolean
 }
 
-const NODE_COUNT = 120
-const CONNECTION_DISTANCE = 2.5
+/* ------------------------------------------------------------------ *
+ *  A modular, descriptive "Software Core":
+ *  - one dark central processor core (smoked glass, black chrome edge)
+ *  - thin surrounding architectural layers (planes with wireframe)
+ *  - floating small modules + data nodes
+ *  - node-graph constellation with faint connection lines
+ *  Never appears as a solid white block.
+ * ------------------------------------------------------------------ */
 
-const positionsRef = { current: new Float32Array(NODE_COUNT * 3) }
-const velocitiesRef = { current: new Float32Array(NODE_COUNT * 3) }
-const originalPositionsRef = { current: new Float32Array(NODE_COUNT * 3) }
-const targetPositionsRef = { current: new Float32Array(NODE_COUNT * 3) }
-const nodeDataRef = { current: [] as Array<{ layer: number; angle: number; radius: number; speed: number }> }
+function DataField({
+  positions,
+  velocities,
+  targets,
+  nodeData,
+}: {
+  positions: React.MutableRefObject<Float32Array>
+  velocities: React.MutableRefObject<Float32Array>
+  targets: React.MutableRefObject<Float32Array>
+  nodeData: React.MutableRefObject<{ layer: number; angle: number; radius: number; speed: number; phase: number }[]>
+}) {
+  const ref = useRef<THREE.Points>(null)
+  const linesRef = useRef<THREE.LineSegments>(null)
 
-function initializeNodeData() {
-  for (let i = 0; i < NODE_COUNT; i++) {
-    const layer = Math.floor(Math.random() * 7)
-    const angle = Math.random() * Math.PI * 2
-    const radius = 0.5 + Math.random() * 1.5
-    const speed = 0.5 + Math.random() * 1.5
-
-    nodeDataRef.current[i] = { layer, angle, radius, speed }
-
-    const baseIndex = i * 3
-
-    positionsRef.current[baseIndex] = Math.cos(angle) * radius
-    positionsRef.current[baseIndex + 1] = (layer - 3) * 0.5
-    positionsRef.current[baseIndex + 2] = Math.sin(angle) * radius
-
-    originalPositionsRef.current[baseIndex] = positionsRef.current[baseIndex]
-    originalPositionsRef.current[baseIndex + 1] = positionsRef.current[baseIndex + 1]
-    originalPositionsRef.current[baseIndex + 2] = positionsRef.current[baseIndex + 2]
-
-    targetPositionsRef.current[baseIndex] = positionsRef.current[baseIndex]
-    targetPositionsRef.current[baseIndex + 1] = positionsRef.current[baseIndex + 1]
-    targetPositionsRef.current[baseIndex + 2] = positionsRef.current[baseIndex + 2]
-  }
-}
-
-initializeNodeData()
-
-function CoreSystem({ scrollProgress = 0, section = 'hero' }: { scrollProgress: number; section: string }) {
-  const nodesRef = useRef<THREE.Points | null>(null)
-  const linesRef = useRef<THREE.LineSegments | null>(null)
-  const planesRef = useRef<THREE.Group | null>(null)
-  const particlesRef = useRef<THREE.Points | null>(null)
-  const { viewport } = useThree()
-
-  useEffect(() => {
-    if (!nodesRef.current || !linesRef.current) return
-
-    const positions = positionsRef.current
-    const originalPositions = originalPositionsRef.current
-    const targetPositions = targetPositionsRef.current
-
-    const sectionConfigs = {
-      hero: { separation: 0, layers: 1, radius: 1.2 },
-      services: { separation: 1.5, layers: 8, radius: 0.8 },
-      capabilities: { separation: 2, layers: 7, radius: 0.6 },
-      process: { separation: 1.8, layers: 7, radius: 0.7 },
-      cta: { separation: 0, layers: 1, radius: 1.2 },
-    }
-
-    const config = sectionConfigs[section as keyof typeof sectionConfigs] || sectionConfigs.hero
-
-    for (let i = 0; i < NODE_COUNT; i++) {
-      const nodeData = nodeDataRef.current[i]
-      const baseIndex = i * 3
-
-      if (config.separation === 0) {
-        targetPositions[baseIndex] = originalPositions[baseIndex]
-        targetPositions[baseIndex + 1] = originalPositions[baseIndex + 1]
-        targetPositions[baseIndex + 2] = originalPositions[baseIndex + 2]
-      } else {
-        const layer = nodeData.layer
-        const layerOffset = (layer - (config.layers - 1) / 2) * config.separation
-        targetPositions[baseIndex] = Math.cos(nodeData.angle) * config.radius
-        targetPositions[baseIndex + 1] = layerOffset
-        targetPositions[baseIndex + 2] = Math.sin(nodeData.angle) * config.radius
-      }
-    }
-  }, [section])
+  const particles = useMemo(() => {
+    return Array.from({ length: 40 }, (_, i) => ({
+      x: (Math.random() - 0.5) * 7,
+      y: (Math.random() - 0.5) * 7,
+      z: (Math.random() - 0.5) * 7,
+      size: 0.5 + Math.random() * 1.2,
+      speed: 0.05 + Math.random() * 0.12,
+    }))
+  }, [])
 
   useFrame((state, delta) => {
-    if (!nodesRef.current || !linesRef.current || !positionsRef.current) return
-
-    const positions = positionsRef.current
-    const velocities = velocitiesRef.current
-    const targetPositions = targetPositionsRef.current
-    const originalPositions = originalPositionsRef.current
-    const time = state.clock.getElapsedTime()
+    const t = state.clock.elapsedTime
+    const arr = positions.current
+    const vel = velocities.current
+    const tgt = targets.current
 
     for (let i = 0; i < NODE_COUNT; i++) {
-      const baseIndex = i * 3
-      const nodeData = nodeDataRef.current[i]
-
-      const dx = targetPositions[baseIndex] - positions[baseIndex]
-      const dy = targetPositions[baseIndex + 1] - positions[baseIndex + 1]
-      const dz = targetPositions[baseIndex + 2] - positions[baseIndex + 2]
-
-      velocities[baseIndex] += dx * 0.03
-      velocities[baseIndex + 1] += dy * 0.03
-      velocities[baseIndex + 2] += dz * 0.03
-
-      velocities[baseIndex] *= 0.92
-      velocities[baseIndex + 1] *= 0.92
-      velocities[baseIndex + 2] *= 0.92
-
-      positions[baseIndex] += velocities[baseIndex]
-      positions[baseIndex + 1] += velocities[baseIndex + 1]
-      positions[baseIndex + 2] += velocities[baseIndex + 2]
-
-      const floatOffset = Math.sin(time * nodeData.speed + nodeData.angle) * 0.02
-      positions[baseIndex + 1] += floatOffset
+      const base = i * 3
+      const d = nodeData.current[i]
+      vel[base] += (tgt[base] - arr[base]) * 0.03
+      vel[base + 1] += (tgt[base + 1] - arr[base + 1]) * 0.03
+      vel[base + 2] += (tgt[base + 2] - arr[base + 2]) * 0.03
+      vel[base] *= 0.9
+      vel[base + 1] *= 0.9
+      vel[base + 2] *= 0.9
+      arr[base] += vel[base]
+      arr[base + 1] += vel[base + 1]
+      arr[base + 2] += vel[base + 2]
+      // very slow idle float
+      arr[base + 1] += Math.sin(t * d.speed + d.phase) * 0.012
     }
 
-    if (nodesRef.current) {
-      nodesRef.current.geometry.attributes.position.needsUpdate = true
+    if (ref.current) {
+      ref.current.geometry.attributes.position.needsUpdate = true
     }
 
-    if (linesRef.current && planesRef.current) {
-      updateConnections()
-      updatePlanes(time)
+    if (linesRef.current) {
+      const linePos = linesRef.current.geometry.attributes.position.array as Float32Array
+      let idx = 0
+      const maxIdx = linePos.length / 6
+      for (let i = 0; i < NODE_COUNT && idx < maxIdx; i++) {
+        for (let j = i + 1; j < NODE_COUNT && idx < maxIdx; j++) {
+          const dx = arr[i * 3] - arr[j * 3]
+          const dy = arr[i * 3 + 1] - arr[j * 3 + 1]
+          const dz = arr[i * 3 + 2] - arr[j * 3 + 2]
+          const dist = Math.hypot(dx, dy, dz)
+          if (dist < LINK_DIST) {
+            linePos[idx * 6] = arr[i * 3]
+            linePos[idx * 6 + 1] = arr[i * 3 + 1]
+            linePos[idx * 6 + 2] = arr[i * 3 + 2]
+            linePos[idx * 6 + 3] = arr[j * 3]
+            linePos[idx * 6 + 4] = arr[j * 3 + 1]
+            linePos[idx * 6 + 5] = arr[j * 3 + 2]
+            idx++
+          }
+        }
+      }
+      for (let k = idx * 6; k < linePos.length; k += 6) {
+        linePos[k] = 0
+        linePos[k + 1] = -100
+        linePos[k + 2] = 0
+        linePos[k + 3] = 0
+        linePos[k + 4] = -100
+        linePos[k + 5] = 0
+      }
+      linesRef.current.geometry.attributes.position.needsUpdate = true
     }
 
-    if (particlesRef.current) {
-      updateParticles(delta, time)
+    if (ref.current) {
+      const p = ref.current.geometry.attributes.position.array as Float32Array
+      for (let i = 0; i < 40; i++) {
+        p[(NODE_COUNT + i) * 3 + 1] -= delta * 0.4
+        if (p[(NODE_COUNT + i) * 3 + 1] < -4) {
+          p[(NODE_COUNT + i) * 3] = (Math.random() - 0.5) * 6
+          p[(NODE_COUNT + i) * 3 + 1] = 4
+          p[(NODE_COUNT + i) * 3 + 2] = (Math.random() - 0.5) * 6
+        }
+      }
+      ref.current.geometry.attributes.position.needsUpdate = true
     }
   })
 
-  const updateConnections = () => {
-    const positions = positionsRef.current
-    if (!linesRef.current) return
-    const linePositions = linesRef.current.geometry.attributes.position.array as Float32Array
-    let lineIndex = 0
-    const maxLines = linePositions.length / 6
+  const nodeGeo = useMemo(() => {
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.BufferAttribute(positions.current, 3))
+    const sizes = new Float32Array(NODE_COUNT + 40)
+    for (let i = 0; i < NODE_COUNT; i++) sizes[i] = 0.9 + Math.random() * 0.8
+    for (let i = 0; i < 40; i++) sizes[NODE_COUNT + i] = 0.5 + Math.random() * 1
+    g.setAttribute('size', new THREE.BufferAttribute(sizes, 1))
+    return g
+  }, [])
 
-    for (let i = 0; i < NODE_COUNT; i++) {
-      for (let j = i + 1; j < NODE_COUNT; j++) {
-        if (lineIndex >= maxLines) break
-
-        const dx = positions[i * 3] - positions[j * 3]
-        const dy = positions[i * 3 + 1] - positions[j * 3 + 1]
-        const dz = positions[i * 3 + 2] - positions[j * 3 + 2]
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
-
-        if (dist < CONNECTION_DISTANCE) {
-          linePositions[lineIndex * 6] = positions[i * 3]
-          linePositions[lineIndex * 6 + 1] = positions[i * 3 + 1]
-          linePositions[lineIndex * 6 + 2] = positions[i * 3 + 2]
-          linePositions[lineIndex * 6 + 3] = positions[j * 3]
-          linePositions[lineIndex * 6 + 4] = positions[j * 3 + 1]
-          linePositions[lineIndex * 6 + 5] = positions[j * 3 + 2]
-
-          lineIndex++
-        }
-      }
-    }
-
-    for (let i = lineIndex * 6; i < linePositions.length; i += 6) {
-      linePositions[i] = 0
-      linePositions[i + 1] = -100
-      linePositions[i + 2] = 0
-      linePositions[i + 3] = 0
-      linePositions[i + 4] = -100
-      linePositions[i + 5] = 0
-    }
-
-    linesRef.current.geometry.attributes.position.needsUpdate = true
-  }
-
-  const updatePlanes = (time: number) => {
-    if (!planesRef.current) return
-
-    planesRef.current.children.forEach((plane, index) => {
-      if (plane instanceof THREE.Mesh) {
-        plane.rotation.y += 0.0005 * (index + 1)
-        plane.rotation.x = Math.sin(time * 0.3 + index) * 0.1
-        if (plane.material instanceof THREE.MeshBasicMaterial) {
-          plane.material.opacity = 0.03 + Math.sin(time + index) * 0.01
-        }
-      }
-    })
-  }
-
-  const updateParticles = (delta: number, time: number) => {
-    if (!particlesRef.current) return
-
-    const positions = particlesRef.current.geometry.attributes.position.array as Float32Array
-    const sizes = particlesRef.current.geometry.attributes.size.array as Float32Array
-
-    for (let i = 0; i < positions.length / 3; i++) {
-      positions[i * 3 + 1] -= delta * 0.3
-
-      if (positions[i * 3 + 1] < -5) {
-        positions[i * 3] = (Math.random() - 0.5) * 8
-        positions[i * 3 + 1] = 5
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 8
-        sizes[i] = Math.random() * 2 + 0.5
-      }
-
-      sizes[i] = 1 + Math.sin(time * 2 + i) * 0.5
-    }
-
-    particlesRef.current.geometry.attributes.position.needsUpdate = true
-    particlesRef.current.geometry.attributes.size.needsUpdate = true
-  }
+  const lineGeo = useMemo(() => {
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(NODE_COUNT * 16 * 3), 3))
+    return g
+  }, [])
 
   return (
     <group>
-      <points
-        ref={nodesRef}
-        onPointerOver={(e) => { (e.object as THREE.Points).material = ((e.object as THREE.Points).material as THREE.PointsMaterial).clone(); ((e.object as THREE.Points).material as THREE.PointsMaterial).size = 4; }}
-        onPointerOut={(e) => { (e.object as THREE.Points).material = ((e.object as THREE.Points).material as THREE.PointsMaterial).clone(); ((e.object as THREE.Points).material as THREE.PointsMaterial).size = 2.5; }}
-      >
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={NODE_COUNT}
-            itemSize={3}
-            array={positionsRef.current}
-            usage={THREE.DynamicDrawUsage}
-          />
-          <bufferAttribute
-            attach="attributes-size"
-            count={NODE_COUNT}
-            itemSize={1}
-            array={new Float32Array(NODE_COUNT).map(() => Math.random() * 1.5 + 2)}
-            usage={THREE.StaticDrawUsage}
-          />
-        </bufferGeometry>
+      <points ref={ref} geometry={nodeGeo}>
         <pointsMaterial
-          color={0xffffff}
-          size={2.5}
+          color={0xd0d0d0}
+          size={1.1}
           sizeAttenuation
           transparent
-          opacity={0.9}
-          blending={THREE.AdditiveBlending}
+          opacity={0.75}
           depthWrite={false}
+          blending={THREE.AdditiveBlending}
         />
       </points>
 
-      <lineSegments ref={linesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={NODE_COUNT * 10}
-            itemSize={3}
-            array={new Float32Array(NODE_COUNT * 10 * 3)}
-            usage={THREE.DynamicDrawUsage}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial
-          color={0xffffff}
-          transparent
-          opacity={0.08}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
+      <lineSegments ref={linesRef} geometry={lineGeo}>
+        <lineBasicMaterial color={0xffffff} transparent opacity={0.05} depthWrite={false} />
       </lineSegments>
-
-      <group ref={planesRef}>
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <mesh key={i}>
-            <planeGeometry args={[4 - i * 0.4, 4 - i * 0.4]} />
-            <meshBasicMaterial
-              color={i % 2 === 0 ? 0xffffff : 0xaaaaaa}
-              transparent
-              opacity={0.02}
-              side={THREE.DoubleSide}
-              depthWrite={false}
-            />
-          </mesh>
-        ))}
-      </group>
-
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={200}
-            itemSize={3}
-            array={new Float32Array(200 * 3).map((_, i) =>
-              i % 3 === 0 ? (Math.random() - 0.5) * 8
-                : i % 3 === 1 ? Math.random() * 10 - 5
-                : (Math.random() - 0.5) * 8
-            )}
-            usage={THREE.DynamicDrawUsage}
-          />
-          <bufferAttribute
-            attach="attributes-size"
-            count={200}
-            itemSize={1}
-            array={new Float32Array(200).map(() => Math.random() * 2 + 0.5)}
-            usage={THREE.DynamicDrawUsage}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          color={0xffffff}
-          size={1}
-          sizeAttenuation
-          transparent
-          opacity={0.15}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </points>
     </group>
   )
 }
 
-export function SoftwareCoreCanvas({ scrollProgress = 0, section = 'hero', className = '' }: SoftwareCoreProps) {
-  const [isReady, setIsReady] = useState(false)
+function SoftwareSystem() {
+  const group = useRef<THREE.Group>(null)
+  const coreMat = useRef<THREE.MeshStandardMaterial>(null)
+  const ring = useRef<THREE.Group>(null)
+
+  const nodeData = useRef<Array<{ layer: number; angle: number; radius: number; speed: number; phase: number }>>([])
+  const positions = useRef(new Float32Array(NODE_COUNT * 3))
+  const velocities = useRef(new Float32Array(NODE_COUNT * 3))
+  const targets = useRef(new Float32Array(NODE_COUNT * 3))
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 100)
-    return () => clearTimeout(timer)
+    const layers = 5
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const layer = Math.floor(Math.random() * layers)
+      const angle = Math.random() * Math.PI * 2
+      const radius = 1.4 + Math.random() * 1.6
+      nodeData.current[i] = {
+        layer,
+        angle,
+        radius,
+        speed: 0.3 + Math.random() * 0.5,
+        phase: Math.random() * Math.PI * 2,
+      }
+      positions.current[i * 3] = Math.cos(angle) * radius
+      positions.current[i * 3 + 1] = (layer - (layers - 1) / 2) * 0.55
+      positions.current[i * 3 + 2] = Math.sin(angle) * radius
+      for (let k = 0; k < 3; k++) targets.current[i * 3 + k] = positions.current[i * 3 + k]
+    }
   }, [])
 
-  if (!isReady) {
-    return (
-      <div className={className} style={{ width: '100%', height: '100%', minHeight: '600px' }} aria-hidden="true" />
-    )
-  }
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    if (group.current) {
+      group.current.rotation.y = Math.sin(t * 0.08) * 0.045
+      group.current.rotation.x = Math.cos(t * 0.06) * 0.02
+    }
+    if (ring.current) {
+      ring.current.rotation.z += 0.0006
+    }
+  })
+
+  const modularMeshes = useMemo(() => {
+    const mods: { pos: [number, number, number]; size: number; speed: number; phase: number }[] = []
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2
+      mods.push({
+        pos: [Math.cos(a) * 1.9, Math.sin(a) * 1.9 * 0.6, (Math.random() - 0.5) * 0.4],
+        size: 0.08 + Math.random() * 0.09,
+        speed: 0.5 + Math.random() * 0.8,
+        phase: Math.random() * Math.PI * 2,
+      })
+    }
+    return mods
+  }, [])
 
   return (
-    <div className={className} style={{ width: '100%', height: '100%', minHeight: '600px' }}>
-      <Canvas
-        camera={{ position: [0, 0, 6], fov: 45 }}
-        gl={{ antialias: true, alpha: true, preserveDrawingBuffer: false, powerPreference: 'high-performance' }}
-        shadows={false}
-        dpr={[1, 1.5]}
-        style={{ touchAction: 'none' }}
-      >
-        <color attach="background" args={[0x000000]} />
-        <fog attach="fog" args={[0x000000, 3, 15]} />
+    <group ref={group}>
+      {/* --- central processor core: smoked glass + black chrome edges --- */}
+      <mesh>
+        <boxGeometry args={[CORE_SIZE, CORE_SIZE, CORE_SIZE]} />
+        <meshStandardMaterial
+          ref={coreMat}
+          color={0x111111}
+          metalness={0.85}
+          roughness={0.32}
+          transparent
+          opacity={0.92}
+        />
+      </mesh>
+      {/* glowing edge lines only (white restrained to edges) */}
+      <lineSegments>
+        <edgesGeometry args={[new THREE.BoxGeometry(CORE_SIZE, CORE_SIZE, CORE_SIZE)]} />
+        <lineBasicMaterial color={0xffffff} transparent opacity={0.5} />
+      </lineSegments>
 
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 10, 5]} intensity={0.3} />
-        <pointLight position={[-3, 5, 3]} intensity={0.2} color={0xffffff} />
+      {/* glass overlay core */}
+      <mesh>
+        <boxGeometry args={[CORE_SIZE * 1.04, CORE_SIZE * 1.04, CORE_SIZE * 1.04]} />
+        <meshPhysicalMaterial
+          color={0x222222}
+          metalness={0.4}
+          roughness={0.12}
+          transparent
+          opacity={0.18}
+          envMapIntensity={0.6}
+        />
+      </mesh>
 
-        <CoreSystem scrollProgress={scrollProgress} section={section} />
-      </Canvas>
+      {/* inner data nucleus (small bright node, not a giant surface) */}
+      <mesh>
+        <sphereGeometry args={[0.42, 24, 24]} />
+        <meshBasicMaterial color={0x333333} transparent opacity={0.6} wireframe />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[0.1, 12, 12]} />
+        <meshBasicMaterial color={0xffffff} transparent opacity={0.9} />
+      </mesh>
+
+      {/* --- surrounding rotating architecture ring --- */}
+      <group ref={ring}>
+        <mesh>
+          <torusGeometry args={[2.25, 0.012, 8, 90]} />
+          <meshBasicMaterial color={0x888888} transparent opacity={0.35} />
+        </mesh>
+        <mesh>
+          <torusGeometry args={[2.5, 0.006, 6, 90]} />
+          <meshBasicMaterial color={0xaaaaaa} transparent opacity={0.2} />
+        </mesh>
+        {/* thin spokes */}
+        {modularMeshes.map((m, i) => (
+          <line key={i}>
+            <bufferGeometry>
+              <bufferAttribute
+                args={[
+                  new Float32Array([Math.cos((i / 14) * Math.PI * 2) * 1.5, Math.sin((i / 14) * Math.PI * 2) * 0.9, 0, m.pos[0], m.pos[1], m.pos[2]]),
+                  3,
+                ]}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial color={0xffffff} transparent opacity={0.06} />
+          </line>
+        ))}
+      </group>
+
+      {/* floating small modules */}
+      {modularMeshes.map((m, i) => (
+        <mesh key={i} position={m.pos}>
+          <boxGeometry args={[m.size, m.size, m.size]} />
+          <meshStandardMaterial color={0x1a1a1a} metalness={0.9} roughness={0.3} />
+        </mesh>
+      ))}
+
+      {/* thin area planes */}
+      {[0, 1, 2, 3].map((i) => (
+        <mesh key={`p${i}`} rotation={[i === 1 || i === 3 ? Math.PI / 2 : 0, i === 2 || i === 3 ? Math.PI / 2 : 0, 0]}>
+          <planeGeometry args={[3.2 - i * 0.3, 3.2 - i * 0.3]} />
+          <meshBasicMaterial color={0x222222} transparent opacity={0.05} side={THREE.DoubleSide} wireframe />
+        </mesh>
+      ))}
+
+      <DataField
+        positions={positions}
+        velocities={velocities}
+        targets={targets}
+        nodeData={nodeData}
+      />
+
+      {/* subtle ground shadow disc */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.2, 0]}>
+        <planeGeometry args={[7, 7]} />
+        <meshBasicMaterial color={0x000000} transparent opacity={0.55} />
+      </mesh>
+    </group>
+  )
+}
+
+function Rig({ light = false }: { light?: boolean }) {
+  const { camera } = useThree()
+  const state = useRef({ mx: 0, my: 0 })
+
+  useFrame((rootState) => {
+    const targetX = state.current.mx * 0.5
+    const targetY = state.current.my * 0.3
+    camera.position.x += (targetX - camera.position.x) * 0.04
+    camera.position.y += (targetY - camera.position.y) * 0.04
+    camera.lookAt(0, 0, 0)
+  })
+
+  return null
+}
+
+export function SoftwareCoreCanvas({ section = 'hero', className = '', light = false }: SoftwareCoreProps) {
+  const [ready, setReady] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setReady(true), 60)
+    return () => window.clearTimeout(id)
+  }, [])
+
+  const env = light
+    ? [
+        { intensity: 2.0, color: '#ffffff' },
+        { intensity: 0.6, color: '#ffffff' },
+        { intensity: 0.3, color: '#ffffff' },
+      ]
+    : [
+        { intensity: 1.1, color: '#ffffff' },
+        { intensity: 0.35, color: '#ffffff' },
+        { intensity: 0.2, color: '#ffffff' },
+      ]
+
+  return (
+    <div ref={wrapRef} className={className} style={{ width: '100%', height: '100%', minHeight: 360, position: 'relative' }} aria-hidden="true">
+      {ready && (
+        <Canvas
+          camera={{ position: [0, 0, 6.2], fov: 42 }}
+          dpr={[1, 1.5]}
+          gl={{ antialias: true, alpha: true }}
+          style={{ touchAction: 'none' }}
+        >
+          <ambientLight intensity={env[0].intensity} />
+          <directionalLight position={[4, 6, 4]} intensity={env[1].intensity} color={env[1].color} />
+          <directionalLight position={[-5, -3, -4]} intensity={env[2].intensity} color={env[2].color} />
+          <SoftwareSystem />
+          <Rig light={light} />
+        </Canvas>
+      )}
     </div>
   )
 }
